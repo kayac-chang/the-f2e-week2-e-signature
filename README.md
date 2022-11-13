@@ -1,6 +1,49 @@
 # The F2E WEEK2 - E Signature
 
-## What's in the stack
+## TODO
+
+- authenticate with Auth0, using:
+  - [remix-auth](https://github.com/sergiodxa/remix-auth)
+  - [remix-auth-auth0](https://github.com/danestves/remix-auth-auth0)
+
+## Features
+
+- 1 anonymous user
+    - 1.1 create new file
+        - upload
+        - signature
+        - download
+        - google drive (optional)
+        - dropbox (optional)
+- 2 authenticate user
+    - 2.1 create new file
+        - upload
+            - snapshot
+            - upload
+            - create new page (optional)
+            - history (optional)
+        - signature
+        - invite
+        - download
+        - share (optional)
+    - 2.2 file manager
+        - filter
+            - date
+            - title
+            - signer
+        - signed
+        - draft
+        - pending
+    - 2.3 setting
+        - config
+        - list of common signer
+    - 2.4 integration (optional)
+        - colleague
+        - cooperator
+
+
+
+## What's in the stac
 
 - [Fly app deployment](https://fly.io) with [Docker](https://www.docker.com/)
 

@@ -1378,6 +1378,11 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@material-design-icons/svg@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/@material-design-icons/svg/-/svg-0.13.1.tgz#654764e2f36a2f736e9057c5945d9bb5e4711f47"
+  integrity sha512-9LxhzauS6vB2J7932AntbwV2B0a/xuM0MzwaLDbJoruQvLJQogold7UBlUO2EbpD46JcUUwWjqiJ0mukEkttoQ==
+
 "@mswjs/cookies@^0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mswjs/cookies/-/cookies-0.2.2.tgz#b4e207bf6989e5d5427539c2443380a33ebb922b"

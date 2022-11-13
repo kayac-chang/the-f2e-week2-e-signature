@@ -28,6 +28,7 @@
     "/public/build"
   ],
   "dependencies": {
+    "@material-design-icons/svg": "^0.13.1",
     "@remix-run/node": "^1.7.5",
     "@remix-run/react": "^1.7.5",
     "@remix-run/serve": "^1.7.5",

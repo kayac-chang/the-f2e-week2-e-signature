@@ -19,6 +19,11 @@ export const links: LinksFunction = () => [
     crossOrigin: "anonymous",
   },
   {
+    rel: "stylesheet",
+    href:
+      "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=optional",
+  },
+  {
     rel: "icon",
     type: "image/x-icon",
     href: require("~/assets/icons/logo.svg"),

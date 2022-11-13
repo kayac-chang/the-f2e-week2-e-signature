@@ -1,0 +1,13 @@
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <path
+            d="M40 12V36H8V12H40ZM40 8H8C5.8 8 4 9.8 4 12V36C4 38.2 5.8 40 8 40H40C42.2 40 44 38.2 44 36V12C44 9.8 42.2 8 40 8Z"
+            fill="currentColor" />
+        <rect x="31" y="17" width="4" height="14" fill="currentColor" />
+        <rect x="30" y="17" width="5" height="4" fill="currentColor" />
+        <rect x="14" y="17" width="4" height="14" fill="currentColor" />
+        <rect x="13" y="17" width="5" height="4" fill="currentColor" />
+        <path d="M26 22H22V18H26V22Z" fill="currentColor" />
+        <path d="M26 30H22V26H26V30Z" fill="currentColor" />
+    </g>
+</svg>
