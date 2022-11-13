@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply font-noto-sans-tc;
+  }
+}
+
+@layer utilities {
+  .theme-primary {
+    @apply bg-primary text-white;
+  }
+}
+@layer components {
+  .title-1 {
+    @apply text-2xl font-bold;
+  }
+
+  .btn {
+    @apply rounded text-center;
+  }
+}

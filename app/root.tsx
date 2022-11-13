@@ -20,8 +20,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href:
-      "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=optional",
+    href: "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=optional",
   },
   {
     rel: "icon",
@@ -42,12 +41,12 @@ export async function loader() {
 
 export default function App() {
   return (
-    <html lang="en">
+    <html lang="zh-TW" className="h-full">
       <head>
         <Meta />
         <Links />
       </head>
-      <body className="flex h-screen flex-col overflow-hidden bg-neutral-5 text-white">
+      <body className="h-full">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
