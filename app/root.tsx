@@ -18,10 +18,16 @@ export const links: LinksFunction = () => [
     href: "https://fonts.gstatic.com",
     crossOrigin: "anonymous",
   },
+  {
+    rel: "icon",
+    type: "image/x-icon",
+    href: require("~/assets/icons/logo.svg"),
+  },
 ];
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
+  title: "快點簽 Fast-Sign | 好從容！您的電子簽署好夥伴",
   viewport: "width=device-width,initial-scale=1",
 });
 
