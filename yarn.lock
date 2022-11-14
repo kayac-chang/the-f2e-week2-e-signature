@@ -1262,11 +1262,6 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@material-design-icons/svg@^0.13.1":
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/@material-design-icons/svg/-/svg-0.13.1.tgz#654764e2f36a2f736e9057c5945d9bb5e4711f47"
-  integrity sha512-9LxhzauS6vB2J7932AntbwV2B0a/xuM0MzwaLDbJoruQvLJQogold7UBlUO2EbpD46JcUUwWjqiJ0mukEkttoQ==
-
 "@mswjs/cookies@^0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mswjs/cookies/-/cookies-0.2.2.tgz#b4e207bf6989e5d5427539c2443380a33ebb922b"
@@ -3153,6 +3148,11 @@ create-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
+
+create-slots@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/create-slots/-/create-slots-0.6.0.tgz#0f34e9374123c08494e66f7f2e789b9a6de3aa2b"
+  integrity sha512-cOuUdbUmombvLlBCkYrcXkFs4X0ekYSmpGCbe06Ai3E2pyqgJY6HvbJwtZidkioQ/w3a0IO90438ScEwJHOc4Q==
 
 cross-env@^7.0.3:
   version "7.0.3"

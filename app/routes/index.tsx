@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import Header from "~/components/Header";
 import Logo from "~/components/Logo";
 
 type StepProps = {
@@ -12,9 +13,9 @@ function Step(props: StepProps) {
     <div className="grid place-content-center gap-2">
       <strong
         className={clsx(
-          "h-10 w-10",
-          "mx-auto grid place-content-center",
-          "rounded-full border-2 border-primary",
+          "step s-10",
+          "mx-auto",
+          "border-2 border-primary",
           "text-primary"
         )}
       >
@@ -32,26 +33,28 @@ function Step(props: StepProps) {
 function Route() {
   return (
     <>
-      {/* header / sm */}
-      <header className="shadow">
-        <div className="container relative flex items-center px-6 py-4">
-          {/* logo */}
-          <Logo />
+      {/* header */}
+      <header className="relative z-10">
+        <div className="shadow">
+          <div className="container relative flex items-center px-6 py-4 lg:py-6">
+            {/* logo */}
+            <Logo />
 
-          {/* title */}
-          <h1 className="title-1 absolute left-1/2 hidden -translate-x-1/2 text-center text-dark-grey lg:block">
-            快速省時的電子簽署工具
-          </h1>
+            {/* title */}
+            <h1 className="title-1 absolute left-1/2 hidden -translate-x-1/2 text-center text-dark-grey lg:block">
+              快速省時的電子簽署工具
+            </h1>
 
-          {/* actions */}
-          <nav className="ml-auto space-x-2">
-            <a className="btn inline-block py-2 px-8 text-primary" href="/">
-              登入
-            </a>
-            <a className="btn theme-primary inline-block py-2 px-8" href="/">
-              註冊
-            </a>
-          </nav>
+            {/* actions */}
+            <nav className="ml-auto space-x-2">
+              <a className="btn inline-block py-2 px-8 text-primary" href="/">
+                登入
+              </a>
+              <a className="btn theme-primary inline-block py-2 px-8" href="/">
+                註冊
+              </a>
+            </nav>
+          </div>
         </div>
       </header>
 

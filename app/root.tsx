@@ -20,7 +20,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=optional",
+    href: "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap",
   },
   {
     rel: "icon",
@@ -46,7 +46,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
+      <body className="flex h-full flex-col">
         <Outlet />
         <ScrollRestoration />
         <Scripts />

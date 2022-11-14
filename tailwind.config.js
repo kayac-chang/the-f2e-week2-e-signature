@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./app/**/*.{ts,tsx,jsx,js}"],
@@ -26,4 +28,18 @@ module.exports = {
       },
     },
   },
+  plugins: [
+    // s: w + h
+    plugin(({ matchUtilities, theme }) => {
+      matchUtilities(
+        {
+          s: (value) => ({
+            width: value,
+            height: value,
+          }),
+        },
+        { values: theme("width") }
+      );
+    }),
+  ],
 };

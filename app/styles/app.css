@@ -22,4 +22,8 @@
   .btn {
     @apply rounded text-center;
   }
+
+  .step {
+    @apply grid place-content-center rounded-full font-bold;
+  }
 }

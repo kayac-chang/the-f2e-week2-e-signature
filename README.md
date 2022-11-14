@@ -8,14 +8,14 @@
 
 ## Features
 
-- 1 anonymous user
+- 1 guest
     - 1.1 create new file
         - upload
         - signature
         - download
         - google drive (optional)
         - dropbox (optional)
-- 2 authenticate user
+- 2 authenticated
     - 2.1 create new file
         - upload
             - snapshot
@@ -40,8 +40,6 @@
     - 2.4 integration (optional)
         - colleague
         - cooperator
-
-
 
 ## What's in the stac
 
