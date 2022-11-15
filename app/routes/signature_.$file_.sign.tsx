@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import Header from "~/components/Header";
 import SideControl from "~/components/SideControl";
 import Steps from "~/components/Steps";
@@ -46,6 +47,30 @@ function Route() {
           {/* canvas view */}
           <canvas className="border s-full" />
         </SideControl.Content>
+
+        <SideControl.Menu>
+          <div className="flex flex-col gap-2">
+            <strong>簽署發起人</strong>
+
+            <input
+              aria-label="issuer-name"
+              name="issuer-name"
+              type="text"
+              value="王心凌"
+              disabled
+              readOnly
+            />
+
+            <input
+              aria-label="issuer-email"
+              name="issuer-email"
+              type="email"
+              value="babywang@gmail.com"
+              disabled
+              readOnly
+            />
+          </div>
+        </SideControl.Menu>
 
         <SideControl.Actions>
           {/* next step */}

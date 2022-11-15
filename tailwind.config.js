@@ -29,6 +29,7 @@ module.exports = {
     },
   },
   plugins: [
+    require("@tailwindcss/forms"),
     // s: w + h
     plugin(({ matchUtilities, theme }) => {
       matchUtilities(

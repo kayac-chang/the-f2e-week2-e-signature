@@ -45,11 +45,11 @@ function Signer() {
 
 function Invite() {
   return (
-    <fieldset>
+    <div className="space-y-2">
       <div className="flex justify-between">
-        <div className="flex flex-col">
+        <div className="flex flex-col space-y-1">
           {/* invite label */}
-          <legend className="font-bold">邀請簽署人</legend>
+          <strong>邀請簽署人</strong>
 
           {/* invite sort */}
           <Toggle labelOff="無簽署順序" labelOn="排列簽署順序" />
@@ -62,7 +62,7 @@ function Invite() {
       </div>
 
       {/* invite list */}
-      <ul className="mt-2 grid gap-2">
+      <ul className="grid gap-2">
         <li>
           <Signer />
         </li>
@@ -73,7 +73,7 @@ function Invite() {
 
       {/* expired time */}
       <Toggle labelOff="無期限" labelOn="指定簽署期限" />
-    </fieldset>
+    </div>
   );
 }
 
@@ -140,6 +140,23 @@ function Route() {
         </SideControl.Content>
 
         <SideControl.Menu>
+          <div className="flex flex-col gap-2">
+            <strong>基本資料</strong>
+
+            <input
+              name="name"
+              type="text"
+              aria-label="請輸入您的姓名"
+              placeholder="請輸入您的姓名"
+            />
+            <input
+              name="email"
+              type="email"
+              aria-label="請輸入您的電子信箱"
+              placeholder="請輸入您的電子信箱"
+            />
+          </div>
+
           {/* signature */}
           <Signature />
 

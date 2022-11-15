@@ -7,6 +7,14 @@
   body {
     @apply font-noto-sans-tc;
   }
+
+  [type="text"],
+  [type="email"] {
+    @apply rounded border border-grey;
+    @apply disabled:bg-light-grey disabled:text-grey;
+    @apply focus:border-primary focus:ring-primary;
+    @apply invalid:border-negative focus:border-negative;
+  }
 }
 
 @layer utilities {
