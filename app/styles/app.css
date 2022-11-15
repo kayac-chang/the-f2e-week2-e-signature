@@ -11,27 +11,6 @@
   canvas {
     @apply h-full w-full;
   }
-
-  [type="text"],
-  [type="email"] {
-    @apply rounded border border-grey;
-    @apply placeholder:text-grey;
-    @apply disabled:bg-light-grey disabled:text-grey;
-    @apply focus:border-primary focus:ring-primary;
-    @apply invalid:border-negative focus:border-negative;
-  }
-
-  [role="tablist"] {
-    @apply flex flex-shrink-0 border-b;
-  }
-
-  [role="tab"] {
-    @apply flex-1 py-3;
-    @apply data-[state=active]:shadow-underline data-[state=active]:text-primary;
-  }
-  [role="tabpanel"] {
-    @apply p-4;
-  }
 }
 
 @layer utilities {
@@ -58,8 +37,36 @@
     @apply rounded text-center;
   }
 
+  [data-btn]:disabled {
+    @apply bg-ui-grey text-grey;
+  }
+
   .step {
     @apply grid place-content-center rounded-full font-bold;
+  }
+
+  [type="text"],
+  [type="email"] {
+    @apply w-full;
+    @apply rounded border border-grey;
+    @apply placeholder:text-grey;
+    @apply disabled:bg-light-grey disabled:text-grey;
+    @apply focus:border-primary focus:ring-primary;
+  }
+
+  label:has(~ input:required) {
+    @apply after:ml-0.5 after:text-red-500 after:content-['*'];
+  }
+
+  [role="tablist"] {
+    @apply flex flex-shrink-0 border-b;
+  }
+  [role="tab"] {
+    @apply flex-1 py-3;
+    @apply data-[state=active]:shadow-underline data-[state=active]:text-primary;
+  }
+  [role="tabpanel"] {
+    @apply p-4;
   }
 
   [data-radio-button] > label {
