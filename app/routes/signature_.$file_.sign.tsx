@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import Header from "~/components/Header";
 import SideControl from "~/components/SideControl";
 import Steps from "~/components/Steps";

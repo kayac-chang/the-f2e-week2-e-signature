@@ -10,6 +10,8 @@ module.exports = {
       },
       fontFamily: {
         "noto-sans-tc": ["Noto Sans TC", "sans-serif"],
+        "noto-serif-tc": ["Noto Serif TC", "sans-serif"],
+        "chenyuluoyan-thin": ["ChenYuluoyan-Thin-Monospaced", "sans-serif"],
       },
       colors: {
         primary: {

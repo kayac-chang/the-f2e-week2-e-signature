@@ -5,15 +5,32 @@
 @layer base {
   html,
   body {
-    @apply font-noto-sans-tc;
+    @apply font-noto-sans-tc text-dark-grey;
+  }
+
+  canvas {
+    @apply h-full w-full;
   }
 
   [type="text"],
   [type="email"] {
     @apply rounded border border-grey;
+    @apply placeholder:text-grey;
     @apply disabled:bg-light-grey disabled:text-grey;
     @apply focus:border-primary focus:ring-primary;
     @apply invalid:border-negative focus:border-negative;
+  }
+
+  [role="tablist"] {
+    @apply flex flex-shrink-0 border-b;
+  }
+
+  [role="tab"] {
+    @apply flex-1 py-3;
+    @apply data-[state=active]:shadow-underline data-[state=active]:text-primary;
+  }
+  [role="tabpanel"] {
+    @apply p-4;
   }
 }
 
@@ -21,17 +38,44 @@
   .theme-primary {
     @apply bg-primary text-white;
   }
+  .position-center {
+    @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  }
+  .shadow-underline {
+    box-shadow: inset 0 -2px 0 -1px currentColor;
+  }
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
 }
 @layer components {
   .title-1 {
     @apply text-2xl font-bold;
   }
 
-  .btn {
+  .btn,
+  [data-btn] {
     @apply rounded text-center;
   }
 
   .step {
     @apply grid place-content-center rounded-full font-bold;
+  }
+
+  [data-radio-button] > label {
+    @apply btn m-[-1px] inline-block border border-grey p-2;
+  }
+  [data-radio-button] > [type="radio"] {
+    @apply hidden;
+  }
+  [data-radio-button] > [type="radio"]:checked ~ label {
+    @apply border-primary bg-primary-selected;
+  }
+
+  [data-color-pick] {
+    @apply border-none;
+    @apply checked:bg-none;
+    @apply checked:ring-4 checked:ring-offset-0;
+    @apply focus:ring-4 focus:ring-offset-0;
   }
 }
