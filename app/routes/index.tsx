@@ -34,29 +34,26 @@ function Route() {
   return (
     <>
       {/* header */}
-      <header className="relative z-10">
-        <div className="shadow">
-          <div className="container relative flex items-center px-6 py-4 lg:py-6">
-            {/* logo */}
-            <Logo />
+      <Header>
+        <Header.Content>
+          {/* logo */}
+          <Logo />
 
-            {/* title */}
-            <h1 className="title-1 absolute left-1/2 hidden -translate-x-1/2 text-center text-dark-grey lg:block">
-              快速省時的電子簽署工具
-            </h1>
+          {/* title */}
+          <h1 className="title-1 absolute left-1/2 hidden -translate-x-1/2 text-center text-dark-grey lg:block">
+            快速省時的電子簽署工具
+          </h1>
+        </Header.Content>
 
-            {/* actions */}
-            <nav className="ml-auto space-x-2">
-              <a className="btn inline-block py-2 px-8 text-primary" href="/">
-                登入
-              </a>
-              <a className="btn theme-primary inline-block py-2 px-8" href="/">
-                註冊
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
+        <Header.Actions>
+          <a className="btn inline-block py-2 px-8 text-primary" href="/">
+            登入
+          </a>
+          <a className="btn theme-primary inline-block py-2 px-8" href="/">
+            註冊
+          </a>
+        </Header.Actions>
+      </Header>
 
       {/* main content */}
       <main className="container p-6 text-center">

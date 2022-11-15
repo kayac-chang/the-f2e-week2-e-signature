@@ -5,8 +5,8 @@ const Visual = createSlot("img");
 const Content = createSlot("div");
 const Footer = createSlot("div");
 
-type ErrorProps = ComponentProps<"main">;
-function Layout(props: ErrorProps) {
+type Props = ComponentProps<"main">;
+function Layout(props: Props) {
   return createHost(props.children, (slot) => (
     <main className="grid h-screen place-content-center bg-primary-selected/20 p-6">
       <div className="m-auto grid max-w-screen-md lg:grid-cols-2">

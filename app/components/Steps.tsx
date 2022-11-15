@@ -8,12 +8,12 @@ import {
 import { useId } from "react";
 import type { ComponentProps } from "react";
 
-export const StepItem = createSlot("li");
+const Item = createSlot("li");
 
 type StepProps = ComponentProps<"strong"> & {
   "data-state"?: "default" | "active" | "disabled";
 };
-export function Step(props: StepProps) {
+function Step(props: StepProps) {
   const state = props["data-state"] ?? "default";
   return (
     <strong
@@ -31,7 +31,7 @@ export function Step(props: StepProps) {
 }
 
 type StepsProps = ComponentProps<"ol">;
-export function Steps(props: StepsProps) {
+function Steps(props: StepsProps) {
   const id = useId();
   return (
     <div className={props.className}>
@@ -63,8 +63,8 @@ export function Steps(props: StepsProps) {
           )}
         >
           {slots.map((slot, index) => {
-            if (isSlot(slot, StepItem)) {
-              return <li key={id + index} {...getSlotProps(slot)}></li>;
+            if (isSlot(slot, Item)) {
+              return <li key={id + index} {...getSlotProps(slot)} />;
             }
             return slot;
           })}
@@ -74,4 +74,6 @@ export function Steps(props: StepsProps) {
   );
 }
 
-export default { Steps, StepItem, Step };
+Steps.Step = Step;
+Steps.Item = Item;
+export default Steps;

@@ -1,11 +1,13 @@
-import Error from "~/components/Error";
+import Presentation from "~/components/Presentation";
 
 function Page() {
   return (
-    <Error.Layout>
-      <Error.Visual src={require("~/assets/images/sending-signer.png")} />
+    <Presentation.Layout>
+      <Presentation.Visual
+        src={require("~/assets/images/sending-signer.png")}
+      />
 
-      <Error.Content>
+      <Presentation.Content>
         <h1 className="title-1 text-primary">檔案已送出簽署</h1>
 
         <div>
@@ -14,9 +16,9 @@ function Page() {
             im-elvis@gmail.com
           </a>
         </div>
-      </Error.Content>
+      </Presentation.Content>
 
-      <Error.Footer>
+      <Presentation.Footer>
         <a href="/" className="btn theme-primary block py-3 font-bold">
           下載檔案
         </a>
@@ -24,8 +26,8 @@ function Page() {
         <a href="/" className="btn block py-3 font-bold text-primary">
           註冊
         </a>
-      </Error.Footer>
-    </Error.Layout>
+      </Presentation.Footer>
+    </Presentation.Layout>
   );
 }
 export default Page;

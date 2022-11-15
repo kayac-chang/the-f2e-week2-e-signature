@@ -1,11 +1,11 @@
-import Error from "~/components/Error";
+import Presentation from "~/components/Presentation";
 
 function Page() {
   return (
-    <Error.Layout>
-      <Error.Visual src={require("~/assets/images/wrong.png")} />
+    <Presentation.Layout>
+      <Presentation.Visual src={require("~/assets/images/wrong.png")} />
 
-      <Error.Content>
+      <Presentation.Content>
         <h1 className="title-1 text-primary">您的檔案無法上傳</h1>
 
         <p className="mt-2">
@@ -15,14 +15,14 @@ function Page() {
             123456@gmail.com
           </a>
         </p>
-      </Error.Content>
+      </Presentation.Content>
 
-      <Error.Footer>
+      <Presentation.Footer>
         <a href="/" className="btn theme-primary block py-3 font-bold">
           回首頁
         </a>
-      </Error.Footer>
-    </Error.Layout>
+      </Presentation.Footer>
+    </Presentation.Layout>
   );
 }
 
