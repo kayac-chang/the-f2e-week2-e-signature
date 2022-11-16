@@ -1,6 +1,10 @@
+import { useNavigate } from "@remix-run/react";
 import clsx from "clsx";
 import Header from "~/components/Header";
 import Logo from "~/components/Logo";
+import getDatabase from "~/storages/indexeddb.client";
+import { blobToArrayBuffer } from "~/utils/blob";
+import dropbox from "~/utils/dropbox";
 
 type StepProps = {
   step: number;
@@ -31,6 +35,37 @@ function Step(props: StepProps) {
 }
 
 function Route() {
+  const navigate = useNavigate();
+
+  async function onFile(files: FileList) {
+    const file = files[0];
+
+    const MB = 1024 * 1024;
+    const LIMIT = 10 * MB;
+    if (file.size >= LIMIT) {
+      console.error(`upload file size large than ${LIMIT}`);
+      return navigate("/error");
+    }
+
+    try {
+      const [buffer, db] = await Promise.all([
+        blobToArrayBuffer(file),
+        getDatabase(),
+      ]);
+      const tx = db.transaction("files", "readwrite");
+      const [id] = await Promise.all([
+        tx.store.add({ name: file.name, buffer }),
+        tx.done,
+        //
+      ]);
+      console.info(`add file ${file.name} into database.`);
+
+      return navigate(`/signature/${id}`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <>
       {/* header */}
@@ -64,7 +99,13 @@ function Route() {
           </h1>
 
           {/* file upload */}
-          <input type="file" id="file-upload" accept="image/*,.pdf" hidden />
+          <input
+            type="file"
+            id="file-upload"
+            accept="image/*,.pdf"
+            hidden
+            onChange={(e) => e.target.files && onFile(e.target.files)}
+          />
           <div
             className={clsx(
               "mt-4",
@@ -73,6 +114,7 @@ function Route() {
               "bg-primary-selected text-primary",
               "h-[28rem] gap-3"
             )}
+            {...dropbox({ onFile })}
           >
             <div className="mx-auto my-2 aspect-square w-20 lg:w-28">
               <img
