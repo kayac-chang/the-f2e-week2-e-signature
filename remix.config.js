@@ -4,7 +4,11 @@ const { flatRoutes } = require("remix-flat-routes");
  * @type {import('@remix-run/dev').AppConfig}
  */
 module.exports = {
-  serverDependenciesToBundle: ["react-children-utilities", "@sindresorhus/is"],
+  serverDependenciesToBundle: [
+    "react-children-utilities",
+    "@sindresorhus/is",
+    "date-fns",
+  ],
   cacheDirectory: "./node_modules/.cache/remix",
   ignoredRouteFiles: ["**/*"],
   routes: async (defineRoutes) => {

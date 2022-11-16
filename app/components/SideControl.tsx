@@ -8,29 +8,6 @@ const Content = createSlot("div");
 const Menu = createSlot(Fragment);
 const Actions = createSlot(Fragment);
 
-type SideControlProps = ComponentProps<"menu">;
-function SideControl(props: SideControlProps) {
-  return (
-    <div
-      className={clsx(
-        "bg-white",
-        "flex justify-end",
-        "w-[90%] max-w-lg",
-        "absolute right-0 h-full",
-        "flex-1 lg:static lg:w-auto"
-      )}
-    >
-      {/* side control toggle */}
-      <button type="button" className="h-full w-4 bg-white shadow-md lg:hidden">
-        <SVG src={require("~/assets/icons/arrow-left.svg")} />
-      </button>
-
-      {/* side control menu */}
-      <menu className="flex flex-1 flex-col gap-10 p-6">{props.children}</menu>
-    </div>
-  );
-}
-
 type Props = ComponentProps<"main">;
 function Layout(props: Props) {
   return createHost(props.children, (slot) => (
@@ -50,13 +27,34 @@ function Layout(props: Props) {
         />
 
         {/* side control */}
-        <SideControl>
-          <Fragment {...slot.getProps(Menu)} />
+        <div
+          className={clsx(
+            "bg-white",
+            "flex justify-end",
+            "h-full w-[90%] max-w-lg",
+            "absolute right-0",
+            "flex-1 lg:static lg:w-auto"
+          )}
+        >
+          {/* side control toggle */}
+          <button
+            type="button"
+            className="h-full w-4 bg-white shadow-md lg:hidden"
+          >
+            <SVG src={require("~/assets/icons/arrow-left.svg")} />
+          </button>
 
-          <div className="mt-auto hidden lg:block">
-            <Fragment {...slot.getProps(Actions)} />
-          </div>
-        </SideControl>
+          {/* side control menu */}
+          <menu className="flex flex-1 flex-col">
+            <div className="flex h-[72vh] flex-col gap-10 overflow-scroll px-6 py-6">
+              <Fragment {...slot.getProps(Menu)} />
+            </div>
+
+            <div className="mt-auto hidden px-6 lg:block">
+              <Fragment {...slot.getProps(Actions)} />
+            </div>
+          </menu>
+        </div>
       </div>
 
       <div className="border-t px-6 pb-6 pt-3 lg:hidden">

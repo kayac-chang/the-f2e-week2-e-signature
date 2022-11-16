@@ -11,6 +11,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import Modal from "~/components/Modal";
 import CreateSign from "~/components/CreateSign";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import DatePicker from "~/components/DatePicker";
 
 function Signer() {
   return (
@@ -394,6 +395,26 @@ function Route() {
 
             {/* expired time */}
             <Toggle labelOff="無期限" labelOn="指定簽署期限" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="week"
+                    name="expired-time"
+                    type="radio"
+                    defaultChecked
+                  />
+                  <label htmlFor="week">7天內</label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input id="month" name="expired-time" type="radio" />
+                  <label htmlFor="month">30天內</label>
+                </div>
+              </div>
+
+              <DatePicker />
+            </div>
           </div>
         </SideControl.Menu>
 
