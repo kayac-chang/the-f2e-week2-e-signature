@@ -14,6 +14,7 @@ function PickColor() {
         className="bg-dark text-dark checked:ring-dark/20 focus:ring-dark/20"
         type="radio"
         name="color"
+        defaultChecked
       />
 
       <input

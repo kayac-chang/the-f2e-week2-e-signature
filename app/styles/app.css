@@ -97,6 +97,22 @@
     @apply p-4;
   }
 
+  /* radio */
+  [type="radio"],
+  [type="radio"]:checked,
+  [type="radio"]:focus {
+    @apply grid place-content-center;
+    @apply border border-grey;
+    @apply bg-white bg-none text-white;
+  }
+  [type="radio"]:checked::before,
+  [type="radio"]:focus::before {
+    @apply rounded-full bg-primary content-[''] s-2;
+  }
+  [type="radio"]:focus {
+    @apply ring-primary;
+  }
+
   /* radio button */
   [data-radio-button] > label {
     @apply btn m-[-1px] inline-block border border-grey p-2;
@@ -114,5 +130,26 @@
     @apply checked:bg-none;
     @apply checked:ring-4 checked:ring-offset-0;
     @apply focus:ring-4 focus:ring-offset-0;
+  }
+
+  /* switch */
+  [role="switch"] {
+    @apply relative rounded-full;
+    @apply h-4 w-8 p-0.5;
+    @apply border;
+    @apply flex items-center;
+  }
+  [role="switch"] > span {
+    @apply block h-full;
+    @apply aspect-square rounded-full;
+  }
+  [role="switch"][data-state="checked"] > span {
+    @apply ml-auto bg-primary;
+  }
+  [role="switch"][data-state="unchecked"] {
+    @apply bg-light-grey;
+  }
+  [role="switch"][data-state="unchecked"] > span {
+    @apply bg-ui-grey;
   }
 }

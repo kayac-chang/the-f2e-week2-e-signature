@@ -1,18 +1,19 @@
-import clsx from "clsx";
-import type { ComponentProps } from "react";
+import * as Switch from "@radix-ui/react-switch";
 
-type ToggleProps = ComponentProps<"div"> & {
+type ToggleProps = Switch.SwitchProps & {
   labelOn: string;
   labelOff: string;
 };
-function Toggle(props: ToggleProps) {
+function Toggle({ labelOn, labelOff, ...props }: ToggleProps) {
   return (
-    <div className={clsx("flex items-center gap-2", props.className)}>
-      <small className="text-dark">{props.labelOn}</small>
+    <div className="flex items-center gap-2">
+      <small className="text-dark">{labelOn}</small>
 
-      <input type="checkbox" />
+      <Switch.Root {...props}>
+        <Switch.Thumb />
+      </Switch.Root>
 
-      <small className="text-dark">{props.labelOff}</small>
+      <small className="text-dark">{labelOff}</small>
     </div>
   );
 }

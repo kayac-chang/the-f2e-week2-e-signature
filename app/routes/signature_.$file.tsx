@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useAsync, useAsyncRetry, useEffectOnce, useToggle } from "react-use";
+import { useAsync, useAsyncRetry, useToggle } from "react-use";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { json } from "@remix-run/server-runtime";
@@ -21,7 +21,6 @@ import getDatabase from "~/storages/indexeddb.client";
 import type { LoaderArgs } from "@remix-run/server-runtime";
 import type { FormEvent } from "react";
 import invariant from "tiny-invariant";
-import { arrayBufferToFile } from "~/utils/blob";
 import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
 import type { PDFPageProxy } from "pdfjs-dist";
 
@@ -56,12 +55,17 @@ function CreateSignatureModal() {
           <CreateSign.Header>
             {/* choose font family */}
             <div data-radio-button>
-              <input id="noto-sans-tc" type="radio" defaultChecked />
+              <input
+                id="noto-sans-tc"
+                type="radio"
+                name="font-family"
+                defaultChecked
+              />
               <label htmlFor="noto-sans-tc">思源黑體</label>
             </div>
 
             <div data-radio-button>
-              <input id="noto-serif-tc" type="radio" />
+              <input id="noto-serif-tc" type="radio" name="font-family" />
               <label htmlFor="noto-serif-tc" className="font-noto-serif-tc">
                 思源宋體
               </label>
@@ -361,6 +365,43 @@ function Preview() {
   return <>{list}</>;
 }
 
+function ExpiredTime() {
+  const [open, setOpen] = useToggle(true);
+  return (
+    <>
+      <Toggle
+        labelOff="無期限"
+        labelOn="指定簽署期限"
+        checked={open}
+        onCheckedChange={setOpen}
+      />
+
+      {open && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <input
+                id="week"
+                name="expired-time"
+                type="radio"
+                defaultChecked
+              />
+              <label htmlFor="week">7天內</label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input id="month" name="expired-time" type="radio" />
+              <label htmlFor="month">30天內</label>
+            </div>
+          </div>
+
+          <DatePicker />
+        </div>
+      )}
+    </>
+  );
+}
+
 function Route() {
   return (
     <>
@@ -452,37 +493,10 @@ function Route() {
             </div>
 
             {/* invite list */}
-            <ul className="grid gap-2">
-              <li>
-                <Signer />
-              </li>
-              <li>
-                <Signer />
-              </li>
-            </ul>
+            <ul className="grid gap-2"></ul>
 
             {/* expired time */}
-            <Toggle labelOff="無期限" labelOn="指定簽署期限" />
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    id="week"
-                    name="expired-time"
-                    type="radio"
-                    defaultChecked
-                  />
-                  <label htmlFor="week">7天內</label>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input id="month" name="expired-time" type="radio" />
-                  <label htmlFor="month">30天內</label>
-                </div>
-              </div>
-
-              <DatePicker />
-            </div>
+            <ExpiredTime />
           </div>
         </SideControl.Menu>
 
