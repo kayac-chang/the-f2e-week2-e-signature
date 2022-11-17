@@ -10,26 +10,6 @@ import type { ComponentProps } from "react";
 
 const Item = createSlot("li");
 
-type StepProps = ComponentProps<"strong"> & {
-  "data-state"?: "default" | "active" | "disabled";
-};
-function Step(props: StepProps) {
-  const state = props["data-state"] ?? "default";
-  return (
-    <strong
-      {...props}
-      className={clsx(
-        "step s-10",
-        state === "default" && "theme-primary",
-        state === "active" &&
-          "theme-primary ring ring-primary/20 ring-offset-2",
-        state === "disabled" && "border-2 border-grey text-dark-grey"
-        //
-      )}
-    />
-  );
-}
-
 type StepsProps = ComponentProps<"ol">;
 function Steps(props: StepsProps) {
   const id = useId();
@@ -74,6 +54,5 @@ function Steps(props: StepsProps) {
   );
 }
 
-Steps.Step = Step;
 Steps.Item = Item;
 export default Steps;

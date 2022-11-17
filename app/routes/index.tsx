@@ -1,9 +1,9 @@
-import { useNavigate } from "@remix-run/react";
 import clsx from "clsx";
+import { useNavigate } from "@remix-run/react";
 import Header from "~/components/Header";
 import Logo from "~/components/Logo";
-import getDatabase from "~/storages/indexeddb.client";
 import { blobToArrayBuffer } from "~/utils/blob";
+import getDatabase from "~/storages/indexeddb.client";
 import dropbox from "~/utils/dropbox";
 
 type StepProps = {
@@ -12,22 +12,15 @@ type StepProps = {
   description: string;
   image: string;
 };
-function Step(props: StepProps) {
+function StepCard(props: StepProps) {
   return (
     <div className="grid place-content-center gap-2">
-      <strong
-        className={clsx(
-          "step s-10",
-          "mx-auto",
-          "border-2 border-primary",
-          "text-primary"
-        )}
-      >
+      <strong data-step="outline" className="mx-auto s-10">
         {props.step}
       </strong>
       <strong>{props.title}</strong>
       <p className="text-dark-grey">{props.description}</p>
-      <div className="aspect-[480/320]">
+      <div className="aspect-[3/2]">
         <img src={props.image} role="presentation" alt="presentation" />
       </div>
     </div>
@@ -75,26 +68,33 @@ function Route() {
           <Logo />
 
           {/* title */}
-          <h1 className="title-1 absolute left-1/2 hidden -translate-x-1/2 text-center text-dark-grey lg:block">
+          <h1
+            data-title="1"
+            className="position-center-x absolute hidden text-center lg:block"
+          >
             快速省時的電子簽署工具
           </h1>
         </Header.Content>
 
         <Header.Actions>
-          <a className="btn inline-block py-2 px-8 text-primary" href="/">
+          <a data-btn="primary" className="inline-block py-2 px-8" href="/">
             登入
           </a>
-          <a className="btn theme-primary inline-block py-2 px-8" href="/">
+          <a
+            data-btn="solid-primary"
+            className="inline-block py-2 px-8"
+            href="/"
+          >
             註冊
           </a>
         </Header.Actions>
       </Header>
 
       {/* main content */}
-      <main className="container p-6 text-center">
+      <main className="container flex-1 p-6 text-center">
         <div>
           {/* title */}
-          <h1 className="title-1 text-dark-grey lg:hidden">
+          <h1 data-title="1" className="lg:hidden">
             快速省時的電子簽署工具
           </h1>
 
@@ -129,7 +129,8 @@ function Route() {
             </p>
             <label
               htmlFor="file-upload"
-              className="btn theme-primary mx-auto w-max py-3 px-10 lg:px-32"
+              data-btn="solid-primary"
+              className="mx-auto w-max py-3 px-10 lg:px-32"
             >
               選擇檔案
             </label>
@@ -140,12 +141,12 @@ function Route() {
         {/* steps */}
         <div className="mt-12">
           {/* steps title */}
-          <h2 className="title-1">輕鬆幾步驟，完成您的簽署</h2>
+          <h2 data-title="1">輕鬆幾步驟，完成您的簽署</h2>
 
           {/* steps list */}
           <ul className="mt-4 grid gap-8 lg:mt-8 lg:grid-cols-3">
             <li>
-              <Step
+              <StepCard
                 step={1}
                 title="上傳檔案"
                 description="選擇PDF檔或是IMG檔"
@@ -153,7 +154,7 @@ function Route() {
               />
             </li>
             <li>
-              <Step
+              <StepCard
                 step={2}
                 title="加入簽名檔"
                 description="手寫、輸入或是上傳簽名檔"
@@ -161,7 +162,7 @@ function Route() {
               />
             </li>
             <li>
-              <Step
+              <StepCard
                 step={3}
                 title="上傳檔案"
                 description="完成簽署可立即傳送檔案給對方"

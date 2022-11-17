@@ -1,9 +1,9 @@
 import { Fragment } from "react";
-import SVG from "~/components/SVG";
+import { useHydrated } from "remix-utils";
 import { createHost, createSlot } from "create-slots";
 import * as Dialog from "@radix-ui/react-dialog";
+import SVG from "~/components/SVG";
 import type { ComponentProps } from "react";
-import { useHydrated } from "remix-utils";
 
 const Trigger = createSlot(Dialog.Trigger);
 const Content = createSlot(Fragment);
@@ -12,9 +12,7 @@ const Title = createSlot(Dialog.Title);
 type Props = ComponentProps<typeof Dialog.Root>;
 function Modal(props: Props) {
   const isHydrated = useHydrated();
-
   if (!isHydrated) return null;
-
   return createHost(props.children, (slot) => (
     <Dialog.Root {...props}>
       <Dialog.Trigger {...slot.getProps(Trigger)} asChild />

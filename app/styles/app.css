@@ -9,7 +9,7 @@
   }
 
   canvas {
-    @apply h-full w-full;
+    @apply w-full;
   }
 }
 
@@ -20,6 +20,9 @@
   .position-center {
     @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
   }
+  .position-center-x {
+    @apply left-1/2 -translate-x-1/2;
+  }
   .shadow-underline {
     box-shadow: inset 0 -2px 0 -1px currentColor;
   }
@@ -28,23 +31,46 @@
   }
 }
 @layer components {
-  .title-1 {
+  /* title */
+  .title-1,
+  [data-title="1"] {
     @apply text-2xl font-bold;
   }
 
+  /* button */
   .btn,
   [data-btn] {
     @apply rounded text-center;
   }
-
+  [data-btn="primary"] {
+    @apply text-primary;
+  }
+  [data-btn="solid-primary"] {
+    @apply theme-primary;
+  }
   [data-btn]:disabled {
     @apply bg-ui-grey text-grey;
   }
 
-  .step {
+  /* step */
+  .step,
+  [data-step] {
     @apply grid place-content-center rounded-full font-bold;
   }
+  [data-step="solid"] {
+    @apply theme-primary;
+  }
+  [data-step="outline"] {
+    @apply border-2 border-primary text-primary;
+  }
+  [data-step="active"] {
+    @apply theme-primary ring ring-primary/20 ring-offset-2;
+  }
+  [data-step="disabled"] {
+    @apply border-2 border-grey text-dark-grey;
+  }
 
+  /* input field */
   [type="text"],
   [type="email"] {
     @apply w-full;
@@ -54,10 +80,12 @@
     @apply focus:border-primary focus:ring-primary;
   }
 
+  /* label required */
   label:has(~ input:required) {
     @apply after:ml-0.5 after:text-red-500 after:content-['*'];
   }
 
+  /* tabs */
   [role="tablist"] {
     @apply flex flex-shrink-0 border-b;
   }
@@ -69,6 +97,7 @@
     @apply p-4;
   }
 
+  /* radio button */
   [data-radio-button] > label {
     @apply btn m-[-1px] inline-block border border-grey p-2;
   }
@@ -79,6 +108,7 @@
     @apply border-primary bg-primary-selected;
   }
 
+  /* color pick */
   [data-color-pick] {
     @apply border-none;
     @apply checked:bg-none;

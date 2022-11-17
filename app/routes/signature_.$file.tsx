@@ -1,17 +1,29 @@
 import clsx from "clsx";
-import { Link } from "@remix-run/react";
+import { useAsync, useAsyncRetry, useEffectOnce, useToggle } from "react-use";
+import * as Tabs from "@radix-ui/react-tabs";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import { json } from "@remix-run/server-runtime";
+import { assert } from "@sindresorhus/is";
+import { Link, useLoaderData } from "@remix-run/react";
+
 import Steps from "~/components/Steps";
 import SVG from "~/components/SVG";
 import SignDrag from "~/components/SignDrag";
 import Toggle from "~/components/Toggle";
 import Header from "~/components/Header";
 import SideControl from "~/components/SideControl";
-
-import * as Tabs from "@radix-ui/react-tabs";
 import Modal from "~/components/Modal";
 import CreateSign from "~/components/CreateSign";
-import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import DatePicker from "~/components/DatePicker";
+import EditTitleModal from "~/components/EditTitleModal";
+import getDatabase from "~/storages/indexeddb.client";
+
+import type { LoaderArgs } from "@remix-run/server-runtime";
+import type { FormEvent } from "react";
+import invariant from "tiny-invariant";
+import { arrayBufferToFile } from "~/utils/blob";
+import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
+import type { PDFPageProxy } from "pdfjs-dist";
 
 function Signer() {
   return (
@@ -204,105 +216,161 @@ function InviteSignerModal() {
   );
 }
 
-function EditTitleModal() {
-  return (
-    <Tabs.Root defaultValue="rename">
-      <Tabs.List>
-        <Tabs.Trigger value="rename">重新命名檔案</Tabs.Trigger>
-      </Tabs.List>
+export function loader(props: LoaderArgs) {
+  assert.string(props.params.file);
 
-      <Tabs.Content value="rename">
-        <div>
-          <label htmlFor="title">檔案</label>
-          <input
-            id="title"
-            type="text"
-            placeholder="請輸入檔案名稱"
-            className="mt-2"
-          />
-        </div>
+  return json({
+    file: {
+      id: Number(props.params.file),
+    },
+  });
+}
 
-        <div className="mt-10 text-center">
-          <button data-btn disabled className="px-8 py-2">
-            儲存
-          </button>
-        </div>
-      </Tabs.Content>
-    </Tabs.Root>
+// async function getFileFromIndexedDB(id: number) {
+//   return ;
+// }
+
+function HeaderLayout() {
+  const data = useLoaderData<typeof loader>();
+  const state = useAsyncRetry(() =>
+    getDatabase()
+      .then((db) => db.transaction("files", "readonly").store.get(data.file.id))
+      .then((file) => file?.name)
   );
+  const [open, setOpen] = useToggle(false);
+
+  async function rename(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const title = new FormData(e.currentTarget).get("title");
+    assert.string(title);
+
+    const db = await getDatabase();
+    const tx = db.transaction("files", "readwrite");
+    const file = await tx.store.get(data.file.id);
+    invariant(file);
+
+    await Promise.all([
+      tx.store.put({ ...file, name: title }),
+      tx.done,
+      //
+    ]);
+
+    state.retry();
+    setOpen(false);
+  }
+
+  return (
+    <Header>
+      <Header.Content>
+        {/* back */}
+        <Link to=".." className="inline-block">
+          <SVG src={require("~/assets/icons/arrow-back.svg")} className="s-6" />
+        </Link>
+
+        {/* title */}
+        <h1 className="ml-3 flex items-center gap-2 font-bold">
+          <span>{state.value}</span>
+
+          {/* edit title */}
+          <Modal open={open} onOpenChange={setOpen}>
+            <Modal.Title className="sr-only">edit title</Modal.Title>
+
+            {/* edit title modal trigger */}
+            <Modal.Trigger asChild>
+              <button className="w-4">
+                <SVG src={require("~/assets/icons/edit.svg")} />
+              </button>
+            </Modal.Trigger>
+
+            <Modal.Content>
+              <EditTitleModal onSubmit={rename} />
+            </Modal.Content>
+          </Modal>
+        </h1>
+      </Header.Content>
+
+      <Header.Actions>
+        <a data-btn="solid-primary" className="inline-block py-2 px-8" href="/">
+          註冊
+        </a>
+      </Header.Actions>
+
+      <Header.Sub>
+        {/* steps */}
+        <div className="shadow [&_[data-step]]:s-10">
+          <Steps>
+            <Steps.Item>
+              <strong data-step="solid">1</strong>
+              <p>成功上傳檔案</p>
+            </Steps.Item>
+            <Steps.Item>
+              <strong data-step="active">2</strong>
+              <p>加入簽名檔</p>
+            </Steps.Item>
+            <Steps.Item>
+              <strong data-step="disabled">3</strong>
+              <p>確認檔案</p>
+            </Steps.Item>
+            <Steps.Item>
+              <strong data-step="disabled">4</strong>
+              <p>下載檔案</p>
+            </Steps.Item>
+          </Steps>
+        </div>
+      </Header.Sub>
+    </Header>
+  );
+}
+
+function render(canvas: HTMLCanvasElement, page: PDFPageProxy) {
+  const scale = canvas.clientWidth / page.getViewport({ scale: 1.0 }).width;
+  const viewport = page.getViewport({ scale });
+  const canvasContext = canvas.getContext("2d");
+  invariant(canvasContext);
+  canvas.height = viewport.height;
+  canvas.width = viewport.width;
+  page.render({
+    canvasContext,
+    viewport,
+  });
+}
+function Preview() {
+  const data = useLoaderData<typeof loader>();
+
+  const state = useAsync<() => Promise<PDFPageProxy[]>>(() =>
+    getDatabase()
+      .then((db) => db.transaction("files", "readonly").store.get(data.file.id))
+      .then((file) => {
+        invariant(file);
+        return file.buffer;
+      })
+      .then(toDocument)
+      .then(getAllPagesFromDocument)
+  );
+
+  if (!state.value) return null;
+
+  const list = state.value.map((page) => (
+    <canvas
+      className="mt-4 border first:mt-0"
+      key={page.pageNumber}
+      ref={(canvas) => canvas && render(canvas, page)}
+    />
+  ));
+  return <>{list}</>;
 }
 
 function Route() {
   return (
     <>
       {/* header */}
-      <Header>
-        <Header.Content>
-          {/* back */}
-          <Link to=".." className="inline-block">
-            <SVG
-              src={require("~/assets/icons/arrow-back.svg")}
-              className="text-dark-grey s-6"
-            />
-          </Link>
-
-          {/* title */}
-          <h1 className="ml-3 flex items-center gap-2 font-bold">
-            <span>型號U-ew8951出貨單</span>
-
-            {/* edit title */}
-            <Modal>
-              <Modal.Title className="sr-only">edit title</Modal.Title>
-
-              {/* edit title modal trigger */}
-              <Modal.Trigger>
-                <button className="w-4">
-                  <SVG src={require("~/assets/icons/edit.svg")} />
-                </button>
-              </Modal.Trigger>
-
-              <Modal.Content>
-                <EditTitleModal />
-              </Modal.Content>
-            </Modal>
-          </h1>
-        </Header.Content>
-
-        <Header.Actions>
-          <a className="btn theme-primary inline-block py-2 px-8" href="/">
-            註冊
-          </a>
-        </Header.Actions>
-
-        <Header.Sub>
-          {/* steps */}
-          <div className="shadow">
-            <Steps>
-              <Steps.Item>
-                <Steps.Step>1</Steps.Step>
-                <p>成功上傳檔案</p>
-              </Steps.Item>
-              <Steps.Item>
-                <Steps.Step data-state="active">2</Steps.Step>
-                <p>加入簽名檔</p>
-              </Steps.Item>
-              <Steps.Item>
-                <Steps.Step data-state="disabled">3</Steps.Step>
-                <p>確認檔案</p>
-              </Steps.Item>
-              <Steps.Item>
-                <Steps.Step data-state="disabled">4</Steps.Step>
-                <p>下載檔案</p>
-              </Steps.Item>
-            </Steps>
-          </div>
-        </Header.Sub>
-      </Header>
+      <HeaderLayout />
 
       <SideControl.Layout>
-        <SideControl.Content>
-          {/* canvas view */}
-          <canvas className="border s-full" />
+        <SideControl.Content className="max-h-[80vh] overflow-scroll">
+          {/* preview */}
+          <Preview />
         </SideControl.Content>
 
         <SideControl.Menu>

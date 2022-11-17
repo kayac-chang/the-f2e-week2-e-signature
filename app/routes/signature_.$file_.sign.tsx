@@ -22,18 +22,18 @@ function Route() {
 
         <Header.Sub>
           {/* steps */}
-          <div className="shadow">
+          <div className="shadow [&_[data-step]]:s-10">
             <Steps>
               <Steps.Item>
-                <Steps.Step data-state="active">1</Steps.Step>
+                <strong data-step="active">1</strong>
                 <p>加入簽名檔</p>
               </Steps.Item>
               <Steps.Item>
-                <Steps.Step data-state="disabled">2</Steps.Step>
+                <strong data-step="disabled">2</strong>
                 <p>確認檔案</p>
               </Steps.Item>
               <Steps.Item>
-                <Steps.Step data-state="disabled">3</Steps.Step>
+                <strong data-step="disabled">3</strong>
                 <p>傳送簽署檔案</p>
               </Steps.Item>
             </Steps>

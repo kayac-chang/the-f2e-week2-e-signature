@@ -15,15 +15,15 @@ function Layout(props: Props) {
       <div className="relative flex flex-1 items-center lg:static">
         {/* content */}
         <div
+          {...slot.getProps(Content)}
           className={clsx(
             "s-full",
             "lg:ml-auto lg:w-3/4",
             "bg-light-grey",
-            "flex items-center justify-center",
-            "p-6"
+            "p-6",
+            slot.getProps(Content)?.className
             //
           )}
-          {...slot.getProps(Content)}
         />
 
         {/* side control */}
@@ -50,7 +50,7 @@ function Layout(props: Props) {
               <Fragment {...slot.getProps(Menu)} />
             </div>
 
-            <div className="mt-auto hidden px-6 lg:block">
+            <div className="mt-auto hidden p-6 lg:block">
               <Fragment {...slot.getProps(Actions)} />
             </div>
           </menu>
