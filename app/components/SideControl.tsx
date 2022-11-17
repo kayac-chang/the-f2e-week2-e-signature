@@ -3,6 +3,7 @@ import { createHost, createSlot } from "create-slots";
 import { Fragment } from "react";
 import SVG from "~/components/SVG";
 import type { ComponentProps } from "react";
+import * as Collapsible from "@radix-ui/react-collapsible";
 
 const Content = createSlot("div");
 const Menu = createSlot(Fragment);
@@ -20,37 +21,55 @@ function Layout(props: Props) {
             "s-full",
             "lg:ml-auto lg:w-3/4",
             "bg-light-grey",
-            "p-6",
             slot.getProps(Content)?.className
             //
           )}
         />
 
-        {/* side control */}
+        {/* side control / sm */}
+        <Collapsible.Root asChild>
+          <div
+            className={clsx(
+              "lg:hidden",
+              "flex justify-end",
+              "h-full max-w-md",
+              "absolute right-0"
+            )}
+          >
+            {/* side control toggle */}
+            <Collapsible.Trigger asChild>
+              <button type="button" className="h-full w-6 bg-white shadow-md">
+                <SVG src={require("~/assets/icons/arrow-left.svg")} />
+              </button>
+            </Collapsible.Trigger>
+
+            {/* side control menu */}
+            <Collapsible.Content asChild>
+              <menu className="flex w-[90vw] flex-1 flex-col bg-white">
+                <div className="flex h-[72vh] flex-col gap-10 overflow-scroll p-6">
+                  <Fragment {...slot.getProps(Menu)} />
+                </div>
+              </menu>
+            </Collapsible.Content>
+          </div>
+        </Collapsible.Root>
+
+        {/* side control / lg */}
         <div
           className={clsx(
-            "bg-white",
-            "flex justify-end",
-            "h-full w-[90%] max-w-lg",
-            "absolute right-0",
-            "flex-1 lg:static lg:w-auto"
+            "hidden lg:flex",
+            "justify-end",
+            "h-full max-w-md",
+            "lg:static lg:w-auto lg:flex-1"
           )}
         >
-          {/* side control toggle */}
-          <button
-            type="button"
-            className="h-full w-4 bg-white shadow-md lg:hidden"
-          >
-            <SVG src={require("~/assets/icons/arrow-left.svg")} />
-          </button>
-
           {/* side control menu */}
-          <menu className="flex flex-1 flex-col">
-            <div className="flex h-[72vh] flex-col gap-10 overflow-scroll px-6 py-6">
+          <menu className="flex w-[90vw] flex-1 flex-col bg-white">
+            <div className="flex h-[72vh] flex-col gap-10 overflow-scroll p-6">
               <Fragment {...slot.getProps(Menu)} />
             </div>
 
-            <div className="mt-auto hidden p-6 lg:block">
+            <div className="mt-auto p-6">
               <Fragment {...slot.getProps(Actions)} />
             </div>
           </menu>

@@ -22,7 +22,9 @@ import type { LoaderArgs } from "@remix-run/server-runtime";
 import type { FormEvent } from "react";
 import invariant from "tiny-invariant";
 import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
-import type { PDFPageProxy } from "pdfjs-dist";
+import { RenderingCancelledException } from "pdfjs-dist";
+import type { PDFPageProxy, RenderTask } from "pdfjs-dist";
+import useCallbackRef from "~/hooks/useCallbackRef";
 
 function Signer() {
   return (
@@ -328,16 +330,40 @@ function HeaderLayout() {
 }
 
 function render(canvas: HTMLCanvasElement, page: PDFPageProxy) {
-  const scale = canvas.clientWidth / page.getViewport({ scale: 1.0 }).width;
-  const viewport = page.getViewport({ scale });
-  const canvasContext = canvas.getContext("2d");
-  invariant(canvasContext);
-  canvas.height = viewport.height;
-  canvas.width = viewport.width;
-  page.render({
-    canvasContext,
-    viewport,
-  });
+  let task: RenderTask;
+  function update() {
+    task?.cancel();
+    const scale = canvas.clientWidth / page.getViewport({ scale: 1.0 }).width;
+    const viewport = page.getViewport({ scale });
+    const canvasContext = canvas.getContext("2d");
+    invariant(canvasContext);
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+    task = page.render({
+      canvasContext,
+      viewport,
+    });
+    task.promise.catch((error) => {
+      if (error instanceof RenderingCancelledException) return;
+      console.error(error);
+    });
+  }
+
+  update();
+  window.addEventListener("resize", update);
+  return () => window.removeEventListener("resize", update);
+}
+type CanvasProps = {
+  className: string;
+  page: PDFPageProxy;
+};
+function Canvas({ page, className }: CanvasProps) {
+  const ref = useCallbackRef(
+    (canvas: HTMLCanvasElement) => render(canvas, page),
+    [page]
+  );
+
+  return <canvas className={className} key={page.pageNumber} ref={ref} />;
 }
 function Preview() {
   const data = useLoaderData<typeof loader>();
@@ -356,10 +382,10 @@ function Preview() {
   if (!state.value) return null;
 
   const list = state.value.map((page) => (
-    <canvas
-      className="mt-4 border first:mt-0"
+    <Canvas
       key={page.pageNumber}
-      ref={(canvas) => canvas && render(canvas, page)}
+      className="mt-3 border first:mt-0 lg:mt-6"
+      page={page}
     />
   ));
   return <>{list}</>;
@@ -409,8 +435,8 @@ function Route() {
       <HeaderLayout />
 
       <SideControl.Layout>
-        <SideControl.Content className="max-h-[80vh] overflow-scroll">
-          {/* preview */}
+        {/* main content */}
+        <SideControl.Content className="max-h-[73vh] overflow-scroll p-3 lg:max-h-[80vh] lg:p-6">
           <Preview />
         </SideControl.Content>
 
