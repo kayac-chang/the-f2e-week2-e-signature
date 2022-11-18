@@ -1,9 +1,10 @@
 import clsx from "clsx";
 import { createHost, createSlot } from "create-slots";
 import { Fragment } from "react";
-import SVG from "~/components/SVG";
 import type { ComponentProps } from "react";
 import * as Collapsible from "@radix-ui/react-collapsible";
+
+import SVG from "~/components/SVG";
 
 const Content = createSlot("div");
 const Menu = createSlot(Fragment);

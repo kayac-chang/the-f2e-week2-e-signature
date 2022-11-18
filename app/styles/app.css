@@ -125,11 +125,21 @@
   }
 
   /* color pick */
-  [data-color-pick] {
-    @apply border-none;
-    @apply checked:bg-none;
-    @apply checked:ring-4 checked:ring-offset-0;
-    @apply focus:ring-4 focus:ring-offset-0;
+  [type="radio"][data-color-pick="black"] {
+    @apply bg-dark text-dark;
+  }
+  [type="radio"][data-color-pick="blue"] {
+    @apply bg-general text-general;
+  }
+  [type="radio"][data-color-pick="red"] {
+    @apply bg-negative text-negative;
+  }
+  [type="radio"][data-color-pick]::before {
+    @apply hidden;
+  }
+  [type="radio"][data-color-pick]:checked,
+  [type="radio"][data-color-pick]:focus {
+    @apply ring ring-current ring-offset-2;
   }
 
   /* switch */

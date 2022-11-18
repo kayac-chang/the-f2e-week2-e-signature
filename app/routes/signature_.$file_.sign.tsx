@@ -1,6 +1,6 @@
 import Header from "~/components/Header";
-import SideControl from "~/components/SideControl";
-import Steps from "~/components/Steps";
+import SideControl from "~/routes/signature/SideControl";
+import Steps from "~/routes/signature/Steps";
 
 function Route() {
   return (

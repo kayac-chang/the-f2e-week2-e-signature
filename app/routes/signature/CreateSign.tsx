@@ -6,34 +6,6 @@ import type { ComponentProps } from "react";
 const Header = createSlot(Fragment);
 const Content = createSlot("div");
 
-function PickColor() {
-  return (
-    <div className="absolute bottom-0 right-0 m-2 flex gap-2">
-      <input
-        data-color-pick
-        className="bg-dark text-dark checked:ring-dark/20 focus:ring-dark/20"
-        type="radio"
-        name="color"
-        defaultChecked
-      />
-
-      <input
-        data-color-pick
-        className="bg-general text-general checked:ring-general/20 focus:ring-general/20"
-        type="radio"
-        name="color"
-      />
-
-      <input
-        data-color-pick
-        className="bg-negative text-negative checked:ring-negative/20 focus:ring-negative/20"
-        type="radio"
-        name="color"
-      />
-    </div>
-  );
-}
-
 type CreateSignProps = ComponentProps<"div">;
 function CreateSign(props: CreateSignProps) {
   return createHost(props.children, (slot) => (
@@ -67,5 +39,4 @@ function CreateSign(props: CreateSignProps) {
 
 CreateSign.Header = Header;
 CreateSign.Content = Content;
-CreateSign.PickColor = PickColor;
 export default CreateSign;
