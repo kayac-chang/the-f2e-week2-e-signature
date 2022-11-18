@@ -21,7 +21,7 @@ function Modal(props: Props) {
         {/* overlay */}
         <Dialog.Overlay className="fixed inset-0 z-10 bg-primary-selected/40 backdrop-blur" />
 
-        <Dialog.Content className="position-center fixed z-10 w-[90%] max-w-prose rounded bg-white shadow-lg">
+        <Dialog.Content className="position-center fixed z-10 w-[90%] max-w-lg rounded bg-white shadow-lg">
           {/* modal top */}
           <div className="flex items-center p-3">
             <Dialog.Close asChild>

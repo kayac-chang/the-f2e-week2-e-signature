@@ -10,6 +10,13 @@ interface Schema extends DBSchema {
       buffer: ArrayBuffer;
     };
   };
+  signatures: {
+    key: number;
+    value: {
+      id?: number;
+      buffer: ArrayBuffer;
+    };
+  };
 }
 
 async function getDatabase() {
@@ -24,6 +31,13 @@ async function getDatabase() {
     upgrade(db) {
       if (!db.objectStoreNames.contains("files")) {
         db.createObjectStore("files", { keyPath: "id", autoIncrement: true });
+      }
+
+      if (!db.objectStoreNames.contains("signatures")) {
+        db.createObjectStore("signatures", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
       }
     },
   });

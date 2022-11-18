@@ -30,7 +30,7 @@ function HeaderLayout(props: Props) {
 
     const db = await getDatabase();
     const tx = db.transaction("files", "readwrite");
-    const file = await tx.store.get(data.file.id);
+    const file = await tx.store.get(props.id);
     invariant(file);
 
     await Promise.all([

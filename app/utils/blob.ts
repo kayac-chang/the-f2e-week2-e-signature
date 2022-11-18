@@ -23,3 +23,16 @@ export function arrayBufferToFile(
 ) {
   return new File([arrayBufferToBlob(buffer, type)], name, { type });
 }
+
+export function canvasToArrayBuffer(canvas: HTMLCanvasElement) {
+  return new Promise<ArrayBuffer>((resolve, reject) =>
+    canvas.toBlob((blob) => {
+      if (!blob) return reject(new Error(`canvas to blob failed`));
+      return resolve(blobToArrayBuffer(blob));
+    })
+  );
+}
+
+export function arrayBufferToImageSrc(buffer: ArrayBuffer, type: string) {
+  return URL.createObjectURL(arrayBufferToBlob(buffer, type));
+}

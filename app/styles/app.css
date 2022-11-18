@@ -27,7 +27,7 @@
     box-shadow: inset 0 -2px 0 -1px currentColor;
   }
   .flex-center {
-    @apply flex items-center justify-center;
+    @apply items-center justify-center;
   }
 }
 @layer components {
@@ -125,13 +125,13 @@
   }
 
   /* color pick */
-  [type="radio"][data-color-pick="black"] {
+  [type="radio"][data-color-pick][value="text-dark"] {
     @apply bg-dark text-dark;
   }
-  [type="radio"][data-color-pick="blue"] {
+  [type="radio"][data-color-pick][value="text-general"] {
     @apply bg-general text-general;
   }
-  [type="radio"][data-color-pick="red"] {
+  [type="radio"][data-color-pick][value="text-negative"] {
     @apply bg-negative text-negative;
   }
   [type="radio"][data-color-pick]::before {
