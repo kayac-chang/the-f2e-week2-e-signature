@@ -75,19 +75,6 @@ function Route() {
             快速省時的電子簽署工具
           </h1>
         </Header.Content>
-
-        <Header.Actions>
-          <a data-btn="primary" className="inline-block py-2 px-8" href="/">
-            登入
-          </a>
-          <a
-            data-btn="solid-primary"
-            className="inline-block py-2 px-8"
-            href="/"
-          >
-            註冊
-          </a>
-        </Header.Actions>
       </Header>
 
       {/* main content */}
@@ -178,16 +165,6 @@ function Route() {
         <div className="container flex items-center px-6 py-5 text-sm">
           {/* copyright */}
           <p>@ 2022 The F2E 4th</p>
-
-          {/* language */}
-          <nav className="ml-auto">
-            <a className="inline-block px-2" href="/">
-              繁中
-            </a>
-            <a className="inline-block px-2" href="/">
-              English
-            </a>
-          </nav>
         </div>
       </footer>
     </>

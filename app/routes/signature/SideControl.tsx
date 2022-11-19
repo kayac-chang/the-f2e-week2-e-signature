@@ -61,7 +61,7 @@ function Layout(props: Props) {
             "hidden lg:flex",
             "justify-end",
             "h-full max-w-md",
-            "lg:static lg:w-auto lg:flex-1"
+            "lg:relative lg:w-auto lg:flex-1"
           )}
         >
           {/* side control menu */}

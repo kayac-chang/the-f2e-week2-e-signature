@@ -1,14 +1,16 @@
 import { openDB } from "idb";
 import type { DBSchema } from "idb";
 
-interface Schema extends DBSchema {
+export interface File {
+  id?: number;
+  name: string;
+  buffer: ArrayBuffer;
+}
+
+export interface Schema extends DBSchema {
   files: {
     key: number;
-    value: {
-      id?: number;
-      name: string;
-      buffer: ArrayBuffer;
-    };
+    value: File;
   };
   signatures: {
     key: number;

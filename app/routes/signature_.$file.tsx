@@ -1,154 +1,26 @@
 import clsx from "clsx";
 import { json } from "@remix-run/server-runtime";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { assert } from "@sindresorhus/is";
 import { useLoaderData } from "@remix-run/react";
+import invariant from "tiny-invariant";
+import { useAsync, useEffectOnce } from "react-use";
+import { useRef, useState } from "react";
 import type { LoaderArgs } from "@remix-run/server-runtime";
-import { map } from "ramda";
+import type { PDFPageProxy } from "pdfjs-dist";
+import type Konva from "konva";
+import type { KonvaEventObject } from "konva/lib/Node";
 
-import SVG from "~/components/SVG";
-import Modal from "~/components/Modal";
-
-import Toggle from "~/routes/signature/Toggle";
 import SideControl from "~/routes/signature/SideControl";
-import SignDrag from "~/routes/signature/SignDrag";
-import ExpiredTime from "~/routes/signature/ExpiredTime";
 import Preview from "~/routes/signature/Preview";
 import HeaderLayout from "~/routes/signature/Header";
-import InviteSignerModal from "~/routes/signature/InviteSignerModal";
-import { useAsyncRetry, useToggle } from "react-use";
+import Signature from "~/routes/signature/Signature";
+import Steps from "~/routes/signature/Steps";
 import getDatabase from "~/storages/indexeddb.client";
-import { arrayBufferToImageSrc } from "~/utils/blob";
-import * as Tabs from "@radix-ui/react-tabs";
-import { Upload, Write } from "~/routes/signature/CreateSignatureModal";
-import { DragEvent } from "react";
-
-function Signer() {
-  return (
-    <SignDrag>
-      <SignDrag.Content>
-        <strong>咖哩 飯</strong>
-        <small className="text-sm text-primary">123456@gmail.com</small>
-      </SignDrag.Content>
-
-      <SignDrag.Menu>
-        <SVG src={require("~/assets/icons/unfold-more.svg")} />
-      </SignDrag.Menu>
-    </SignDrag>
-  );
-}
-
-async function saveSignature(buffer: ArrayBuffer) {
-  return getDatabase()
-    .then((db) => db.transaction("signatures", "readwrite"))
-    .then((tx) =>
-      Promise.all([
-        tx.store.add({ buffer }),
-        tx.done,
-        //
-      ])
-    );
-}
-
-async function getAllSignatures() {
-  return getDatabase()
-    .then((db) => db.getAll("signatures"))
-    .then(
-      map((signature) => ({
-        ...signature,
-        src: arrayBufferToImageSrc(signature.buffer, "image/png"),
-      }))
-    );
-}
-
-function Signature() {
-  const [open, toggle] = useToggle(false);
-  const state = useAsyncRetry(() => getAllSignatures());
-
-  async function onSubmit(buffer: ArrayBuffer) {
-    return saveSignature(buffer).then(state.retry).then(toggle);
-  }
-
-  function onDragStart(src: string) {
-    return (_event: DragEvent) => {
-      const event = _event.nativeEvent;
-      _event.dataTransfer.setData(
-        "signature",
-        JSON.stringify({
-          start_position: {
-            x: event.offsetX,
-            y: event.offsetY,
-          },
-          src,
-        })
-      );
-    };
-  }
-
-  return (
-    <div className="flex flex-col gap-2">
-      <strong>我的簽名</strong>
-
-      <ul className="grid gap-2">
-        {state.value?.map((signature) => (
-          <li key={signature.id}>
-            <SignDrag
-              className="h-[100px] w-[400px]"
-              onDragStart={onDragStart(signature.src)}
-            >
-              <SignDrag.Content>
-                <img src={signature.src} alt="signature" />
-              </SignDrag.Content>
-            </SignDrag>
-          </li>
-        ))}
-      </ul>
-
-      {/* create signature */}
-      <Modal open={open} onOpenChange={toggle}>
-        <Modal.Title className="sr-only">create signature</Modal.Title>
-
-        {/* create signature modal trigger */}
-        <Modal.Trigger>
-          <button
-            data-btn
-            className={clsx(
-              "flex items-center justify-center gap-2",
-              "border border-grey py-3"
-              //
-            )}
-          >
-            <SVG className="w-6" src={require("~/assets/icons/plus.svg")} />
-            <strong>創建簽名檔</strong>
-          </button>
-        </Modal.Trigger>
-
-        <Modal.Content>
-          <Tabs.Root defaultValue="write">
-            {/* tabs */}
-            <Tabs.List>
-              <Tabs.Trigger value="write">手寫</Tabs.Trigger>
-              <Tabs.Trigger value="upload">上傳</Tabs.Trigger>
-            </Tabs.List>
-
-            {/* write */}
-            <Tabs.Content value="write">
-              <Write onSubmit={onSubmit} />
-            </Tabs.Content>
-
-            {/* upload */}
-            <Tabs.Content value="upload">
-              <Upload onSubmit={onSubmit} />
-            </Tabs.Content>
-          </Tabs.Root>
-        </Modal.Content>
-      </Modal>
-    </div>
-  );
-}
+import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
 
 export function loader(props: LoaderArgs) {
   assert.string(props.params.file);
-
   return json({
     file: {
       id: Number(props.params.file),
@@ -158,10 +30,87 @@ export function loader(props: LoaderArgs) {
 
 function Route() {
   const data = useLoaderData<typeof loader>();
+
+  const state = useAsync<() => Promise<PDFPageProxy[]>>(() =>
+    getDatabase()
+      .then((db) => db.transaction("files", "readonly"))
+      .then((tx) => tx.store.get(data.file.id))
+      .then((file) => {
+        invariant(file);
+        return file.buffer;
+      })
+      .then(toDocument)
+      .then(getAllPagesFromDocument)
+  );
+
+  const menuRef = useRef<HTMLMenuElement>(null);
+  const signatureRef = useRef<Konva.Image | null>(null);
+  useEffectOnce(() => {
+    function close() {
+      if (!menuRef.current) return;
+      menuRef.current.hidden = true;
+      signatureRef.current = null;
+    }
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  });
+
+  function onContextMenu(event: KonvaEventObject<MouseEvent>) {
+    if (!event.target.hasName("signature")) return;
+
+    event.evt.preventDefault();
+    const pointer = event.evt;
+
+    if (!menuRef.current) return;
+    const menu = menuRef.current;
+    menu.hidden = false;
+    menu.style.top = pointer.offsetY + menu.clientHeight / 2 + "px";
+    menu.style.left = pointer.offsetX + menu.clientWidth / 2 + "px";
+
+    signatureRef.current = event.target as Konva.Image;
+  }
+
+  function removeSignatureFromPreview() {
+    const signature = signatureRef.current;
+    const stage = signature?.getStage();
+    const tr = stage?.findOne(".tr") as Konva.Transformer;
+    invariant(signature && stage && tr);
+    tr.nodes([]);
+    signature.destroy();
+    signatureRef.current = null;
+    stage.fire("change");
+  }
+
+  const [hasEdit, setHasEdit] = useState(false);
+  const onStageChange = (stage: Konva.Stage) =>
+    setHasEdit(Boolean(stage.findOne(".signature")));
+
+  const [step, setStep] = useState(1);
+  const list = ["成功上傳檔案", "加入簽名檔", "確認檔案", "下載檔案"];
+  const stepstate = (index: number) => {
+    if (index < step) return "solid";
+    if (index === step) return "active";
+    return "disabled";
+  };
+  const prevStep = () => setStep(step - 1);
+  const nextStep = () => setStep(step + 1);
+
   return (
     <>
       {/* header */}
-      <HeaderLayout id={data.file.id} />
+      <HeaderLayout id={data.file.id}>
+        {/* steps */}
+        <div className="shadow [&_[data-step]]:s-10">
+          <Steps>
+            {list.map((step, index) => (
+              <Steps.Item key={step}>
+                <strong data-step={stepstate(index)}>{index + 1}</strong>
+                <p>{step}</p>
+              </Steps.Item>
+            ))}
+          </Steps>
+        </div>
+      </HeaderLayout>
 
       <SideControl.Layout>
         {/* main content */}
@@ -170,79 +119,88 @@ function Route() {
             "flex flex-col gap-6",
             "max-h-[73vh] p-3",
             "overflow-scroll",
-            "lg:max-h-[80vh] lg:p-6"
+            "lg:max-h-[80vh] lg:p-6",
+            "relative"
             //
           )}
         >
-          <Preview id={data.file.id} />
+          {state.value?.map((page) => (
+            <Preview
+              key={page.pageNumber}
+              page={page}
+              onContextMenu={onContextMenu}
+              onChange={onStageChange}
+            />
+          ))}
+
+          <menu
+            className="absolute overflow-hidden rounded shadow"
+            ref={menuRef}
+            hidden
+          >
+            <button
+              type="button"
+              className="bg-white p-2 hover:bg-primary-selected hover:text-primary"
+              onClick={removeSignatureFromPreview}
+            >
+              Delete
+            </button>
+          </menu>
         </SideControl.Content>
 
         <SideControl.Menu>
-          {/* basic information */}
-          <div className="flex flex-col gap-2">
-            <strong>基本資料</strong>
-
-            <input
-              name="name"
-              type="text"
-              aria-label="請輸入您的姓名"
-              placeholder="請輸入您的姓名"
-            />
-            <input
-              name="email"
-              type="email"
-              aria-label="請輸入您的電子信箱"
-              placeholder="請輸入您的電子信箱"
-            />
-          </div>
-
           {/* signature */}
           <Signature />
-
-          {/* invite signer */}
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <div className="flex flex-col space-y-1">
-                {/* label */}
-                <strong>邀請簽署人</strong>
-
-                {/* sort */}
-                <Toggle labelOff="無簽署順序" labelOn="排列簽署順序" />
-              </div>
-
-              {/* invite signer modal */}
-              <Modal>
-                <Modal.Title className="sr-only">invite signer</Modal.Title>
-
-                {/* invite signer modal trigger */}
-                <Modal.Trigger>
-                  <button
-                    data-btn
-                    className="aspect-square w-12 border border-grey p-3"
-                  >
-                    <SVG src={require("~/assets/icons/person-add.svg")} />
-                  </button>
-                </Modal.Trigger>
-
-                <Modal.Content>
-                  <InviteSignerModal />
-                </Modal.Content>
-              </Modal>
-            </div>
-
-            {/* invite list */}
-            <ul className="grid gap-2"></ul>
-
-            {/* expired time */}
-            <ExpiredTime />
-          </div>
         </SideControl.Menu>
 
         <SideControl.Actions>
           {/* next step */}
-          <a href="/" className="btn block bg-ui-grey py-3 text-dark-grey">
-            下一步
-          </a>
+          <AlertDialog.Root>
+            <AlertDialog.Trigger asChild>
+              <button
+                type="button"
+                data-btn="solid-primary"
+                className="w-full py-3"
+                disabled={!hasEdit}
+                onClick={nextStep}
+              >
+                下一步
+              </button>
+            </AlertDialog.Trigger>
+
+            <AlertDialog.Overlay className="absolute inset-0 bg-primary-selected/40 backdrop-blur" />
+
+            <AlertDialog.Content className="flex-center absolute inset-0 flex flex-col">
+              <div className="w-[80%] space-y-8 rounded bg-white p-10 text-center shadow">
+                <div className="space-y-2">
+                  <strong className="text-2xl text-primary">
+                    請確認您的檔案
+                  </strong>
+                  <p>確認後將無法修改。</p>
+                </div>
+
+                <div>
+                  <button
+                    type="button"
+                    data-btn="solid-primary"
+                    className="w-full py-3"
+                  >
+                    確認
+                  </button>
+                  <AlertDialog.Cancel asChild>
+                    <button
+                      type="button"
+                      data-btn="text-primary"
+                      className="w-full py-3"
+                      onClick={prevStep}
+                    >
+                      返回
+                    </button>
+                  </AlertDialog.Cancel>
+                </div>
+              </div>
+            </AlertDialog.Content>
+          </AlertDialog.Root>
         </SideControl.Actions>
       </SideControl.Layout>
     </>

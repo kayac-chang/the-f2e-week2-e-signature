@@ -1,12 +1,12 @@
-import { useAsync } from "react-use";
-import invariant from "tiny-invariant";
-
-import getDatabase from "~/storages/indexeddb.client";
-import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
-import type { PDFPageProxy } from "pdfjs-dist";
 import Konva from "konva";
+import { forwardRef, useRef } from "react";
+import invariant from "tiny-invariant";
+import type { DragEvent, Ref } from "react";
+import type { PDFPageProxy } from "pdfjs-dist";
+import type { KonvaEventListener } from "konva/lib/Node";
+
 import useCallbackRef from "~/hooks/useCallbackRef";
-import { DragEvent, useRef } from "react";
+import { mergeRefs } from "~/utils/react";
 
 async function toImage(url: string) {
   return new Promise<Konva.Image>((resolve) => {
@@ -33,10 +33,21 @@ function pdfToImageSource(scale: number) {
 
 type StageProps = {
   page: PDFPageProxy;
+  onChange?: (stage: Konva.Stage) => void;
+  onContextMenu?: KonvaEventListener<Konva.Stage, MouseEvent>;
 };
-function Stage(props: StageProps) {
+function Stage(props: StageProps, ref: Ref<Konva.Stage>) {
   const stageRef = useRef<Konva.Stage | null>(null);
+  const setStageRef = mergeRefs(stageRef, ref);
+
   const layerRef = useRef<Konva.Layer | null>(null);
+  const transformerRef = useRef<Konva.Transformer>(
+    new Konva.Transformer({
+      name: "tr",
+      rotateEnabled: false,
+      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
+    })
+  );
 
   const render = useCallbackRef(
     (container: HTMLDivElement | null) => {
@@ -53,6 +64,7 @@ function Stage(props: StageProps) {
           .then((image) => {
             const layer = new Konva.Layer();
             layer.add(image);
+            layer.add(transformerRef.current);
             layerRef.current = layer;
 
             const stage = new Konva.Stage({
@@ -61,13 +73,36 @@ function Stage(props: StageProps) {
               height: image.height(),
             });
             stage.add(layer);
-            stageRef.current = stage;
+            setStageRef(stage);
+
+            const tr = transformerRef.current;
+            stage.on("click tap", (e) => {
+              // only select signature
+              if (e.target.hasName("signature")) {
+                return tr.nodes([e.target]);
+              }
+
+              // remove all selections
+              return tr.nodes([]);
+            });
+
+            props.onContextMenu && stage.on("contextmenu", props.onContextMenu);
+            stage.on("change", () => props.onChange?.(stage));
           });
       }
 
       update();
       window.addEventListener("resize", update);
-      return () => window.removeEventListener("resize", update);
+      return () => {
+        // clean up
+        if (stageRef.current) {
+          const stage = stageRef.current;
+          stage.destroy();
+          setStageRef(null);
+        }
+
+        window.removeEventListener("resize", update);
+      };
     },
     [props.page]
   );
@@ -83,18 +118,27 @@ function Stage(props: StageProps) {
       src: string;
     };
 
-    toImage(signature.src).then((image) => {
-      const scale = 400 / image.width();
-      image.size({
-        width: 400,
-        height: image.height() * scale,
+    return toImage(signature.src)
+      .then((image) => {
+        const scale = 400 / image.width();
+        image.size({
+          width: 400,
+          height: image.height() * scale,
+        });
+        image.position({
+          x: event.offsetX - signature.start_position.x,
+          y: event.offsetY - signature.start_position.y,
+        });
+        image.draggable(true);
+        image.name("signature");
+        return image;
+      })
+      .then((image) => {
+        // side effect
+        layer.add(image);
+        transformerRef.current.nodes([image]);
+        stageRef.current?.fire("change");
       });
-      image.position({
-        x: event.offsetX - signature.start_position.x,
-        y: event.offsetY - signature.start_position.y,
-      });
-      layer.add(image);
-    });
   }
 
   return (
@@ -107,24 +151,4 @@ function Stage(props: StageProps) {
   );
 }
 
-type PreviewProps = {
-  id: number;
-};
-function Preview(props: PreviewProps) {
-  const state = useAsync<() => Promise<PDFPageProxy[]>>(() =>
-    getDatabase()
-      .then((db) => db.transaction("files", "readonly").store.get(props.id))
-      .then((file) => {
-        invariant(file);
-        return file.buffer;
-      })
-      .then(toDocument)
-      .then(getAllPagesFromDocument)
-  );
-
-  const list = state.value?.map((page) => (
-    <Stage key={page.pageNumber} page={page} />
-  ));
-  return <>{list}</>;
-}
-export default Preview;
+export default forwardRef(Stage);
