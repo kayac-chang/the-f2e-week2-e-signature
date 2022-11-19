@@ -12,6 +12,6 @@ export function getAllPagesFromDocument(
   document: PDFDocumentProxy
 ): Promise<PDFPageProxy[]> {
   return Promise.all(
-    range(1, document.numPages).map(document.getPage.bind(document))
+    range(1, document.numPages + 1).map(document.getPage.bind(document))
   );
 }

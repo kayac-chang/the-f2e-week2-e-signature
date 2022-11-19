@@ -17,16 +17,10 @@ import HeaderLayout from "~/routes/signature/Header";
 import InviteSignerModal from "~/routes/signature/InviteSignerModal";
 import { useAsyncRetry, useToggle } from "react-use";
 import getDatabase from "~/storages/indexeddb.client";
-import {
-  arrayBufferToImageSrc,
-  blobToArrayBuffer,
-  canvasToArrayBuffer,
-} from "~/utils/blob";
-import { FormEvent } from "react";
+import { arrayBufferToImageSrc } from "~/utils/blob";
 import * as Tabs from "@radix-ui/react-tabs";
-import { Typing, Upload, Write } from "~/routes/signature/CreateSignatureModal";
-import * as htmlToImage from "html-to-image";
-import invariant from "tiny-invariant";
+import { Upload, Write } from "~/routes/signature/CreateSignatureModal";
+import { DragEvent } from "react";
 
 function Signer() {
   return (
@@ -74,6 +68,22 @@ function Signature() {
     return saveSignature(buffer).then(state.retry).then(toggle);
   }
 
+  function onDragStart(src: string) {
+    return (_event: DragEvent) => {
+      const event = _event.nativeEvent;
+      _event.dataTransfer.setData(
+        "signature",
+        JSON.stringify({
+          start_position: {
+            x: event.offsetX,
+            y: event.offsetY,
+          },
+          src,
+        })
+      );
+    };
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <strong>我的簽名</strong>
@@ -81,7 +91,14 @@ function Signature() {
       <ul className="grid gap-2">
         {state.value?.map((signature) => (
           <li key={signature.id}>
-            <img src={signature.src} alt="signature" />
+            <SignDrag
+              className="h-[100px] w-[400px]"
+              onDragStart={onDragStart(signature.src)}
+            >
+              <SignDrag.Content>
+                <img src={signature.src} alt="signature" />
+              </SignDrag.Content>
+            </SignDrag>
           </li>
         ))}
       </ul>
@@ -115,12 +132,12 @@ function Signature() {
 
             {/* write */}
             <Tabs.Content value="write">
-              <Write onSubmitArrayBuffer={onSubmit} />
+              <Write onSubmit={onSubmit} />
             </Tabs.Content>
 
             {/* upload */}
             <Tabs.Content value="upload">
-              <Upload onSubmitArrayBuffer={onSubmit} />
+              <Upload onSubmit={onSubmit} />
             </Tabs.Content>
           </Tabs.Root>
         </Modal.Content>
@@ -148,7 +165,15 @@ function Route() {
 
       <SideControl.Layout>
         {/* main content */}
-        <SideControl.Content className="max-h-[73vh] overflow-scroll p-3 lg:max-h-[80vh] lg:p-6">
+        <SideControl.Content
+          className={clsx(
+            "flex flex-col gap-6",
+            "max-h-[73vh] p-3",
+            "overflow-scroll",
+            "lg:max-h-[80vh] lg:p-6"
+            //
+          )}
+        >
           <Preview id={data.file.id} />
         </SideControl.Content>
 

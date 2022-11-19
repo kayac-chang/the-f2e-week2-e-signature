@@ -1,16 +1,15 @@
+import clsx from "clsx";
+import Konva from "konva";
+import { append } from "ramda";
+import invariant from "tiny-invariant";
+import { useRef, useState } from "react";
+import { assert } from "@sindresorhus/is";
+import { useEffectOnce } from "react-use";
 import { Form } from "@remix-run/react";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import Konva from "konva";
-import type { FormProps } from "@remix-run/react";
-import type { KonvaEventObject } from "konva/lib/Node";
-import useCallbackRef from "~/hooks/useCallbackRef";
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
-import { append } from "ramda";
-import { useEffectOnce } from "react-use";
-import invariant from "tiny-invariant";
-import { assert } from "@sindresorhus/is";
 import { blobToArrayBuffer } from "~/utils/blob";
-import clsx from "clsx";
+import type { KonvaEventObject } from "konva/lib/Node";
+import type { ChangeEvent, FormEvent } from "react";
 
 const color = {
   "text-dark": "#323338",
@@ -37,7 +36,7 @@ function PickColor() {
 
 type onSubmitArrayBuffer = (buffer: ArrayBuffer) => void;
 type WriteProps = {
-  onSubmitArrayBuffer: onSubmitArrayBuffer;
+  onSubmit: onSubmitArrayBuffer;
 };
 export function Write(props: WriteProps) {
   const [history, setHistory] = useState<Konva.Line[]>([]);
@@ -124,7 +123,7 @@ export function Write(props: WriteProps) {
         assert.blob(blob);
         return blobToArrayBuffer(blob);
       })
-      .then(props.onSubmitArrayBuffer);
+      .then(props.onSubmit);
   }
 
   return (
@@ -179,7 +178,7 @@ export function Write(props: WriteProps) {
 }
 
 type UploadProps = {
-  onSubmitArrayBuffer: onSubmitArrayBuffer;
+  onSubmit: onSubmitArrayBuffer;
 };
 export function Upload(props: UploadProps) {
   const [file, setFile] = useState<File>();
@@ -198,7 +197,7 @@ export function Upload(props: UploadProps) {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    return file && blobToArrayBuffer(file).then(props.onSubmitArrayBuffer);
+    return file && blobToArrayBuffer(file).then(props.onSubmit);
   }
 
   async function render(container: HTMLDivElement | null) {

@@ -3,46 +3,108 @@ import invariant from "tiny-invariant";
 
 import getDatabase from "~/storages/indexeddb.client";
 import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
+import type { PDFPageProxy } from "pdfjs-dist";
+import Konva from "konva";
 import useCallbackRef from "~/hooks/useCallbackRef";
+import { DragEvent, useRef } from "react";
 
-import { RenderingCancelledException } from "pdfjs-dist";
-import type { PDFPageProxy, RenderTask } from "pdfjs-dist";
+async function toImage(url: string) {
+  return new Promise<Konva.Image>((resolve) => {
+    Konva.Image.fromURL(url, (image: Konva.Image) => resolve(image));
+  });
+}
 
-function render(canvas: HTMLCanvasElement, page: PDFPageProxy) {
-  let task: RenderTask;
-  function update() {
-    task?.cancel();
-    const scale = canvas.clientWidth / page.getViewport({ scale: 1.0 }).width;
+function pdfToImageSource(scale: number) {
+  const canvas = document.createElement("canvas");
+  const canvasContext = canvas.getContext("2d");
+  invariant(canvasContext);
+
+  return async (page: PDFPageProxy) => {
     const viewport = page.getViewport({ scale });
-    const canvasContext = canvas.getContext("2d");
-    invariant(canvasContext);
     canvas.height = viewport.height;
     canvas.width = viewport.width;
-    task = page.render({
+    const task = page.render({
       canvasContext,
       viewport,
     });
-    task.promise.catch((error) => {
-      if (error instanceof RenderingCancelledException) return;
-      console.error(error);
+    return task.promise.then(() => canvas.toDataURL());
+  };
+}
+
+type StageProps = {
+  page: PDFPageProxy;
+};
+function Stage(props: StageProps) {
+  const stageRef = useRef<Konva.Stage | null>(null);
+  const layerRef = useRef<Konva.Layer | null>(null);
+
+  const render = useCallbackRef(
+    (container: HTMLDivElement | null) => {
+      function update() {
+        if (!container) return;
+
+        const page = props.page;
+        const scale =
+          container.clientWidth / page.getViewport({ scale: 1.0 }).width;
+
+        Promise.resolve(page)
+          .then(pdfToImageSource(scale))
+          .then(toImage)
+          .then((image) => {
+            const layer = new Konva.Layer();
+            layer.add(image);
+            layerRef.current = layer;
+
+            const stage = new Konva.Stage({
+              container,
+              width: image.width(),
+              height: image.height(),
+            });
+            stage.add(layer);
+            stageRef.current = stage;
+          });
+      }
+
+      update();
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    },
+    [props.page]
+  );
+
+  function onDrop(_event: DragEvent) {
+    const event = _event.nativeEvent;
+    const raw_signature = event.dataTransfer?.getData("signature");
+    const layer = layerRef.current;
+    if (!raw_signature || !layer) return;
+
+    const signature = JSON.parse(raw_signature) as {
+      start_position: { x: number; y: number };
+      src: string;
+    };
+
+    toImage(signature.src).then((image) => {
+      const scale = 400 / image.width();
+      image.size({
+        width: 400,
+        height: image.height() * scale,
+      });
+      image.position({
+        x: event.offsetX - signature.start_position.x,
+        y: event.offsetY - signature.start_position.y,
+      });
+      layer.add(image);
     });
   }
 
-  update();
-  window.addEventListener("resize", update);
-  return () => window.removeEventListener("resize", update);
-}
-type CanvasProps = {
-  className: string;
-  page: PDFPageProxy;
-};
-function Canvas({ page, className }: CanvasProps) {
-  const ref = useCallbackRef(
-    (canvas: HTMLCanvasElement) => render(canvas, page),
-    [page]
+  return (
+    <div
+      className="w-full"
+      ref={render}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+    />
   );
-
-  return <canvas className={className} key={page.pageNumber} ref={ref} />;
 }
 
 type PreviewProps = {
@@ -60,14 +122,8 @@ function Preview(props: PreviewProps) {
       .then(getAllPagesFromDocument)
   );
 
-  if (!state.value) return null;
-
-  const list = state.value.map((page) => (
-    <Canvas
-      key={page.pageNumber}
-      className="mt-3 border first:mt-0 lg:mt-6"
-      page={page}
-    />
+  const list = state.value?.map((page) => (
+    <Stage key={page.pageNumber} page={page} />
   ));
   return <>{list}</>;
 }
