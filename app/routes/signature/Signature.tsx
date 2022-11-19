@@ -11,6 +11,7 @@ import SignDrag from "~/routes/signature/SignDrag";
 import { Upload, Write } from "~/routes/signature/CreateSignatureModal";
 import getDatabase from "~/storages/indexeddb.client";
 import { arrayBufferToImageSrc } from "~/utils/blob";
+import { promiseHash } from "remix-utils";
 
 async function saveSignature(buffer: ArrayBuffer) {
   return getDatabase()
@@ -28,11 +29,9 @@ async function getAllSignatures() {
   return getDatabase()
     .then((db) => db.getAll("signatures"))
     .then(
-      map((signature) => ({
-        ...signature,
-        src: arrayBufferToImageSrc(signature.buffer, "image/png"),
-      }))
-    );
+      map((signature) => arrayBufferToImageSrc(signature.buffer, "image/png"))
+    )
+    .then(Promise.all.bind(Promise)) as Promise<string[]>;
 }
 
 function onDragStart(src: string) {
@@ -63,13 +62,13 @@ function Signature() {
       {/* signatures */}
       <ul className="grid gap-2">
         {state.value?.map((signature) => (
-          <li key={signature.id}>
+          <li key={signature}>
             <SignDrag
               className="h-[100px] w-[400px]"
-              onDragStart={onDragStart(signature.src)}
+              onDragStart={onDragStart(signature)}
             >
               <SignDrag.Content>
-                <img src={signature.src} alt="signature" />
+                <img src={signature} alt="signature" />
               </SignDrag.Content>
             </SignDrag>
           </li>

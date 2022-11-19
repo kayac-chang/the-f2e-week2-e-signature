@@ -19,6 +19,10 @@ export interface Schema extends DBSchema {
       buffer: ArrayBuffer;
     };
   };
+  documents: {
+    key: number;
+    value: File;
+  };
 }
 
 async function getDatabase() {
@@ -32,11 +36,21 @@ async function getDatabase() {
   return openDB<Schema>(name, version, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("files")) {
-        db.createObjectStore("files", { keyPath: "id", autoIncrement: true });
+        db.createObjectStore("files", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
       }
 
       if (!db.objectStoreNames.contains("signatures")) {
         db.createObjectStore("signatures", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
+      }
+
+      if (!db.objectStoreNames.contains("documents")) {
+        db.createObjectStore("documents", {
           keyPath: "id",
           autoIncrement: true,
         });

@@ -1,8 +1,9 @@
 import clsx from "clsx";
+import { map } from "ramda";
 import { json } from "@remix-run/server-runtime";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { assert } from "@sindresorhus/is";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { useAsync, useEffectOnce } from "react-use";
 import { useRef, useState } from "react";
@@ -10,6 +11,7 @@ import type { LoaderArgs } from "@remix-run/server-runtime";
 import type { PDFPageProxy } from "pdfjs-dist";
 import type Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
+import type { Schema } from "~/storages/indexeddb.client";
 
 import SideControl from "~/routes/signature/SideControl";
 import Preview from "~/routes/signature/Preview";
@@ -18,6 +20,20 @@ import Signature from "~/routes/signature/Signature";
 import Steps from "~/routes/signature/Steps";
 import getDatabase from "~/storages/indexeddb.client";
 import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
+import jsPDF from "jspdf";
+import PDFMerger from "pdf-merger-js/browser";
+
+async function save(file: Schema["documents"]["value"]) {
+  return getDatabase()
+    .then((db) => db.transaction("documents", "readwrite"))
+    .then((tx) =>
+      Promise.all([
+        tx.store.add(file),
+        tx.done,
+        //
+      ])
+    );
+}
 
 export function loader(props: LoaderArgs) {
   assert.string(props.params.file);
@@ -31,6 +47,16 @@ export function loader(props: LoaderArgs) {
 function Route() {
   const data = useLoaderData<typeof loader>();
 
+  const file = useAsync<() => Promise<Schema["files"]["value"]>>(() =>
+    getDatabase()
+      .then((db) => db.transaction("files", "readonly"))
+      .then((tx) => tx.store.get(data.file.id))
+      .then((file) => {
+        invariant(file);
+        return file;
+      })
+  );
+
   const state = useAsync<() => Promise<PDFPageProxy[]>>(() =>
     getDatabase()
       .then((db) => db.transaction("files", "readonly"))
@@ -43,6 +69,7 @@ function Route() {
       .then(getAllPagesFromDocument)
   );
 
+  const stagesRef = useRef<Konva.Stage[]>([]);
   const menuRef = useRef<HTMLMenuElement>(null);
   const signatureRef = useRef<Konva.Image | null>(null);
   useEffectOnce(() => {
@@ -95,6 +122,38 @@ function Route() {
   const prevStep = () => setStep(step - 1);
   const nextStep = () => setStep(step + 1);
 
+  const navigate = useNavigate();
+
+  async function submit() {
+    invariant(stagesRef.current);
+
+    return Promise.resolve(stagesRef.current)
+      .then(
+        map((stage) => {
+          // cancel all transformer
+          const tr = stage.findOne(".tr") as Konva.Transformer;
+          tr.nodes([]);
+
+          const src = stage.toDataURL();
+          const doc = new jsPDF({ compress: true });
+          doc.addImage(src, 0, 0, 210, 297);
+          return doc.output("blob");
+        })
+      )
+      .then((tasks) => Promise.all(tasks))
+      .then(async (files) => {
+        const merger = new PDFMerger();
+
+        for (const file of files) {
+          await merger.add(file);
+        }
+        const buffer = await merger.saveAsBuffer();
+
+        invariant(file.value?.name);
+        save({ name: file.value.name, buffer });
+      });
+  }
+
   return (
     <>
       {/* header */}
@@ -130,6 +189,7 @@ function Route() {
               page={page}
               onContextMenu={onContextMenu}
               onChange={onStageChange}
+              ref={(ref) => ref && stagesRef.current.push(ref)}
             />
           ))}
 
@@ -184,6 +244,7 @@ function Route() {
                     type="button"
                     data-btn="solid-primary"
                     className="w-full py-3"
+                    onClick={submit}
                   >
                     確認
                   </button>

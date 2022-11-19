@@ -11,6 +11,9 @@ function readBlob<T extends FileReader["result"]>(exec: Execute) {
 export async function blobToArrayBuffer(blob: Blob) {
   return readBlob<ArrayBuffer>((reader) => reader.readAsArrayBuffer(blob));
 }
+export async function blobToDataURL(blob: Blob) {
+  return readBlob<string>((reader) => reader.readAsDataURL(blob));
+}
 
 export function arrayBufferToBlob(buffer: ArrayBuffer, type: string) {
   return new Blob([buffer], { type });
@@ -33,6 +36,7 @@ export function canvasToArrayBuffer(canvas: HTMLCanvasElement) {
   );
 }
 
-export function arrayBufferToImageSrc(buffer: ArrayBuffer, type: string) {
-  return URL.createObjectURL(arrayBufferToBlob(buffer, type));
+export async function arrayBufferToImageSrc(buffer: ArrayBuffer, type: string) {
+  const blob = arrayBufferToBlob(buffer, type);
+  return blobToDataURL(blob);
 }
