@@ -4,6 +4,7 @@ import type { DBSchema } from "idb";
 export interface File {
   id?: number;
   name: string;
+  original?: ArrayBuffer;
   buffer: ArrayBuffer;
 }
 
@@ -18,10 +19,6 @@ export interface Schema extends DBSchema {
       id?: number;
       buffer: ArrayBuffer;
     };
-  };
-  documents: {
-    key: number;
-    value: File;
   };
 }
 
@@ -44,13 +41,6 @@ async function getDatabase() {
 
       if (!db.objectStoreNames.contains("signatures")) {
         db.createObjectStore("signatures", {
-          keyPath: "id",
-          autoIncrement: true,
-        });
-      }
-
-      if (!db.objectStoreNames.contains("documents")) {
-        db.createObjectStore("documents", {
           keyPath: "id",
           autoIncrement: true,
         });

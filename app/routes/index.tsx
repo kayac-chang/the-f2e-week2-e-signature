@@ -47,7 +47,7 @@ function Route() {
       ]);
       const tx = db.transaction("files", "readwrite");
       const [id] = await Promise.all([
-        tx.store.add({ name: file.name, buffer }),
+        tx.store.add({ name: file.name, original: buffer, buffer }),
         tx.done,
         //
       ]);

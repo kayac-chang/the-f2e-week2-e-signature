@@ -23,12 +23,12 @@ import { getAllPagesFromDocument, toDocument } from "~/utils/pdf.client";
 import jsPDF from "jspdf";
 import PDFMerger from "pdf-merger-js/browser";
 
-async function save(file: Schema["documents"]["value"]) {
+async function save(file: Schema["files"]["value"]) {
   return getDatabase()
-    .then((db) => db.transaction("documents", "readwrite"))
+    .then((db) => db.transaction("files", "readwrite"))
     .then((tx) =>
       Promise.all([
-        tx.store.add(file),
+        tx.store.put(file),
         tx.done,
         //
       ])
@@ -149,9 +149,10 @@ function Route() {
         }
         const buffer = await merger.saveAsBuffer();
 
-        invariant(file.value?.name);
-        save({ name: file.value.name, buffer });
-      });
+        invariant(file.value);
+        return save({ ...file.value, buffer });
+      })
+      .then(() => navigate(`/signature/${data.file.id}/complete`));
   }
 
   return (

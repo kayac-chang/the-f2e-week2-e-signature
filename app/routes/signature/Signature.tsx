@@ -10,8 +10,7 @@ import Modal from "~/components/Modal";
 import SignDrag from "~/routes/signature/SignDrag";
 import { Upload, Write } from "~/routes/signature/CreateSignatureModal";
 import getDatabase from "~/storages/indexeddb.client";
-import { arrayBufferToImageSrc } from "~/utils/blob";
-import { promiseHash } from "remix-utils";
+import { arrayBufferToDataURL } from "~/utils/blob";
 
 async function saveSignature(buffer: ArrayBuffer) {
   return getDatabase()
@@ -29,7 +28,7 @@ async function getAllSignatures() {
   return getDatabase()
     .then((db) => db.getAll("signatures"))
     .then(
-      map((signature) => arrayBufferToImageSrc(signature.buffer, "image/png"))
+      map((signature) => arrayBufferToDataURL(signature.buffer, "image/png"))
     )
     .then(Promise.all.bind(Promise)) as Promise<string[]>;
 }

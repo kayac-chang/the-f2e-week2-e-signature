@@ -36,7 +36,7 @@ export function canvasToArrayBuffer(canvas: HTMLCanvasElement) {
   );
 }
 
-export async function arrayBufferToImageSrc(buffer: ArrayBuffer, type: string) {
+export async function arrayBufferToDataURL(buffer: ArrayBuffer, type: string) {
   const blob = arrayBufferToBlob(buffer, type);
   return blobToDataURL(blob);
 }
